@@ -1,0 +1,42 @@
+{
+  "name": "uzel",
+  "version": "0.0.1",
+  "homepage": "https://github.com/briksoftware/uzel",
+  "description": "A node.js based application server for IOT applications and home/industrial automation",
+  "license": "MIT",
+  "author": "Michele Balistreri",
+  "contributors": [
+    "Ksenia Lebedeva"
+  ],
+  "main": "./index.js",
+  "scripts": {
+    "test": "mocha -R spec ./test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/briksoftware/uzel"
+  },
+  "keywords": [
+    "application server",
+    "sensor network",
+    "iot",
+    "internet of things",
+    "home automation",
+    "home control",
+    "industrial automation"
+  ],
+  "bugs": {
+    "url": "https://github.com/briksoftware/uzel/issues"
+  },
+  "dependencies" : {
+    "tlv": "1.0.x",
+    "plugin-loader": "0.0.x"
+  },
+  "devDependencies": {
+    "mocha": "1.18.x",
+    "chai": "1.9.x"
+  },
+  "engines": {
+    "node": ">= 0.10"
+  }
+}

@@ -30,7 +30,8 @@
   },
   "dependencies" : {
     "tlv": "1.0.x",
-    "plugin-loader": "0.0.x"
+    "plugin-loader": "0.0.x",
+    "express": "visionmedia/express"
   },
   "devDependencies": {
     "mocha": "1.18.x",

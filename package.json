@@ -28,10 +28,11 @@
   "bugs": {
     "url": "https://github.com/briksoftware/uzel/issues"
   },
-  "dependencies" : {
-    "tlv": "1.0.x",
+  "dependencies": {
+    "es6-shim": "^0.10.1",
+    "express": "visionmedia/express",
     "plugin-loader": "0.0.x",
-    "express": "visionmedia/express"
+    "tlv": "1.0.x"
   },
   "devDependencies": {
     "mocha": "1.18.x",

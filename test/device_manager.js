@@ -9,6 +9,7 @@ describe('DeviceManager', function() {
   
   var mockDevice = new device_manager.Device(device_manager.DeviceType, 'mock');
   var subMockDevice = new device_manager.Device(device_manager.DeviceType, 'mock', mockDevice, 1);
+  var secondMockDevice = new device_manager.Device(device_manager.DeviceType, 'mock');
   
   describe('#DeviceManager', function() {
     it('should return an instance of DeviceManager', function() {
@@ -137,6 +138,17 @@ describe('DeviceManager', function() {
       tlvPacket.value[2].value[0].tag.should.equal(0x80);
       tlvPacket.value[2].value[0].value.should.deep.equal(new Buffer([0x01]));
       tlvPacket.value[2].value[1].tag.should.equal(0xA0);
+    });
+  });
+  
+  describe('#groupCommandsByPhysicalDevice', function() {    
+    it('should group commands by the physical device to which they should be sent', function() {
+			var dm = new DeviceManager({});
+      var cb = function() {};
+      var commands = [ dm.createGetDeviceInfoCommand(mockDevice, cb), dm.createGetDeviceInfoCommand(subMockDevice, cb), dm.createGetDeviceInfoCommand(secondMockDevice, cb) ];
+      var sortedCommands = device_manager.groupCommandsByPhysicalDevice(commands);
+      sortedCommands.get(mockDevice).length.should.equal(2);
+      sortedCommands.get(secondMockDevice).length.should.equal(1);
     });
   });
 });

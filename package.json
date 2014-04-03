@@ -10,7 +10,7 @@
   ],
   "main": "./index.js",
   "scripts": {
-    "test": "mocha -R spec ./test/index.js"
+    "test": "mocha -R spec ./test/*.js"
   },
   "repository": {
     "type": "git",

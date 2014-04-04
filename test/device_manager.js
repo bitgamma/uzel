@@ -7,9 +7,9 @@ describe('DeviceManager', function() {
   var TLV = tlv.TLV;
   chai.should();
   
-  var mockDevice = new device_manager.Device(device_manager.DeviceType, 'mock');
-  var subMockDevice = new device_manager.Device(device_manager.DeviceType, 'mock', mockDevice, 1);
-  var secondMockDevice = new device_manager.Device(device_manager.DeviceType, 'mock');
+  var mockDevice = new device_manager.Device('mock', 'mock');
+  var subMockDevice = new device_manager.Device('mock', 'mock', null, mockDevice, 1);
+  var secondMockDevice = new device_manager.Device('mock2', 'mock');
   
   describe('#DeviceManager', function() {
     it('should return an instance of DeviceManager', function() {

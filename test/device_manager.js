@@ -30,6 +30,22 @@ describe('DeviceManager', function() {
       command.callback.should.equals(cb);
     });
   });
+
+  describe('#createConfigureCommand', function() {
+    it('should return a DeviceCommand for CONFIGURE', function() {
+			var dm = new DeviceManager({});
+      var param = new TLV(0x82, new Buffer([0xBA, 0xBA]));
+      var cb = function() {};
+      var command = dm.createConfigureCommand(mockDevice, [ param ], cb);
+      command.should.be.instanceof(device_manager.DeviceCommand);
+      command.device.should.equal(mockDevice);
+      command.type.should.equal(device_manager.CommandType.CONFIGURE);
+      command.parameters.length.should.equal(1);
+      command.parameters[0].tag.should.equal(0xA0);
+      command.parameters[0].getFirstChild(0x82).should.deep.equal(param);
+      command.callback.should.equals(cb);
+    });
+  });
   
   describe('#createGetDataCommand', function() {
     it('should return a DeviceCommand for GET DATA with parameters', function() {

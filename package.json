@@ -29,10 +29,10 @@
     "url": "https://github.com/briksoftware/uzel/issues"
   },
   "dependencies": {
-    "es6-shim": "^0.10.1",
+    "es6-shim": "0.10.x",
     "express": "visionmedia/express",
     "plugin-loader": "0.0.x",
-    "tlv": "1.0.x"
+    "tlv": "1.1.x"
   },
   "devDependencies": {
     "mocha": "1.18.x",

@@ -1,0 +1,24 @@
+mixin applianceButton(appliance)
+  .col-md-4.col-sm-4.col-xs-12
+    .appliance-button
+      a(href="#{appliance.url}")
+        img(src="#{appliance.icon}", width="128", height="128", class="block-img") 
+        | #{appliance.label}
+        
+doctype html
+html(lang="en")
+  head
+    title Uzel v0.0.1
+    link(rel="stylesheet", href="/bower_components/bootswatch/yeti/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/index.css")  
+  body
+    #container.container
+      - for (var i = 0; i < appliances.length; i = i + 3)
+        .row
+          - for (var j = 0; (j < 3) && ((i+j) < appliances.length); j++)
+            +applianceButton(appliances[i+j])
+      #footer
+        small
+          a(href="https://github.com/briksoftware/uzel") Uzel v0.0.1
+          | &nbsp;&nbsp;&copy; Michele Balistreri &amp; Ksenia Lebedeva -&nbsp;
+          a(href="https://github.com/briksoftware/uzel/blob/master/LICENSE") MIT License     

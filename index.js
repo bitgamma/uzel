@@ -4,8 +4,8 @@ var ApplianceManager = require('./lib/appliance_manager').ApplianceManager;
 
 // Substitute with a real configuration object
 var config = {
-  connectorDirectories: [ path.join(__dirname, "lib/plugins/connectors") ],
-  applianceDirectories: [ path.join(__dirname, "lib/plugins/appliances") ],
+  connectorDirectories: [ path.join(__dirname, "plugins/connectors") ],
+  applianceDirectories: [ path.join(__dirname, "plugins/appliances") ],
 };
 
 var deviceManager = new DeviceManager(config);

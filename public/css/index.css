@@ -1,0 +1,29 @@
+small {
+  color: rgb(100, 100, 100);
+}
+
+small a, small a:hover {
+  color: rgb(67, 172, 106);
+}
+
+.appliance-button {
+  background-color: rgb(67, 172, 106);
+  padding: 30px;
+  text-align: center;  
+  margin-bottom: 20px;
+}
+
+.block-img {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.appliance-button a, .appliance-button a:hover {
+  color: white;
+  font-size: 16pt;
+}
+
+#container{
+  margin-top: 70px;
+}

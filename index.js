@@ -12,6 +12,6 @@ var deviceManager = new DeviceManager(config);
 
 deviceManager.start(function() {
   var applicationManager = new ApplianceManager(config, deviceManager);
-  applicationManager.start();  
+  applicationManager.start();
 });
 

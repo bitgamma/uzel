@@ -6,7 +6,8 @@ describe('DeviceManager', function() {
   var tlv = require('tlv');
   var TLV = tlv.TLV;
   chai.should();
-  
+
+  var mock_connector = require('./mock_connector');  
   var mockDevice = new device_manager.Device('mock', 'mock');
   var subMockDevice = new device_manager.Device('mock', 'mock', null, mockDevice, 1);
   var secondMockDevice = new device_manager.Device('mock2', 'mock');
@@ -165,6 +166,16 @@ describe('DeviceManager', function() {
       var sortedCommands = device_manager.groupCommandsByPhysicalDevice(commands);
       sortedCommands.get(mockDevice).length.should.equal(2);
       sortedCommands.get(secondMockDevice).length.should.equal(1);
+    });
+  });
+  
+  describe('#discoverDevices', function() {    
+    it('should discover devices on available connectors', function(done) {
+			var dm = new DeviceManager({});
+      dm._connectorLoader.loadedModules['mock'] = mock_connector;
+      dm.discoverDevices(function(device) {
+        done();
+      });
     });
   });
 });

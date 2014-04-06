@@ -1,4 +1,4 @@
 uzel
 ====
 
-A node.js based application server for IOT applications
+A project under heavy development which is not ready to use yet

@@ -30,6 +30,14 @@ exports.start = function() {
   
 }
 
+exports.pair = function(device, pairingData, cb) {
+  cb(device);
+}
+
+exports.unpair = function(device, cb) {
+  cb(device);
+}
+
 exports.discoverDevices = function(cb) {
   for(var i = 0, len = availableDevices.length; i < len; i++) {
     var dev = availableDevices[i];

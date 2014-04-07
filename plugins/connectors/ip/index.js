@@ -4,6 +4,14 @@ exports.start = function() {
   
 }
 
+exports.pair = function(device, pairingData, cb) {
+  cb(device);
+}
+
+exports.unpair = function(device, cb) {
+  cb(device);
+}
+
 exports.discoverDevices = function(cb) {
   //substitute with real code, maybe db, maybe SSDP, maybe both?
   var discoveredDevices = [ new IPProtocolInfo('127.0.0.1', 4000) ];

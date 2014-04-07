@@ -37,12 +37,14 @@ exports.discoverDevices = function(cb) {
   }
 }
 
-exports.send = function(device, tlvData, cb) { 
+exports.send = function(device, data, cb) { 
+  var tlvData = tlv.parse(data);
+  
   if (tlvData.value[0].tag == 0xA0) {
     if (tlvData.value[0].getFirstChild(0x80)) {
-      cb(device.protocolInfo.subdeviceInfo);     
+      cb(device.protocolInfo.subdeviceInfo.encode());     
     } else {
-      cb(device.protocolInfo.getInfoData);
+      cb(device.protocolInfo.getInfoData.encode());
     }
   }
 }

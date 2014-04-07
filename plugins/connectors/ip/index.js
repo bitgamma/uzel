@@ -1,4 +1,3 @@
-var tlv = require('tlv');
 var net = require('net');
 
 exports.start = function() {
@@ -15,14 +14,14 @@ exports.discoverDevices = function(cb) {
   }
 }
 
-exports.send = function(device, tlvData, cb) {  
+exports.send = function(device, data, cb) {  
   var client = net.connect(device.protocolInfo.port, device.protocolInfo.address, function() {
-    client.on('data', function(data) {
+    client.on('data', function(responseData) {
       client.end();
-      cb(tlv.parse(data));
+      cb(responseData);
     });
   
-    client.write(tlvData.encode());
+    client.write(data);
   });
 }
 

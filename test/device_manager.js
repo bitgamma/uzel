@@ -9,7 +9,7 @@ describe('DeviceManager', function() {
 
   var mock_connector = require('./mock_connector');  
   var mockDevice = new device_manager.Device('mock', 'mock');
-  var subMockDevice = new device_manager.Device('mock', 'mock', null, mockDevice, 1);
+  var subMockDevice = new device_manager.Device('mock', 'mock', null, mockDevice, 0);
   var secondMockDevice = new device_manager.Device('mock2', 'mock');
   
   describe('#DeviceManager', function() {
@@ -149,11 +149,11 @@ describe('DeviceManager', function() {
       tlvPacket.value[1].tag.should.equal(0xA0);
       tlvPacket.value[1].value.length.should.equal(1);
       tlvPacket.value[1].value[0].tag.should.equal(0x80);
-      tlvPacket.value[1].value[0].value.should.deep.equal(new Buffer([0x01]));
+      tlvPacket.value[1].value[0].value.should.deep.equal(new Buffer([0x00]));
       tlvPacket.value[2].tag.should.equal(0xA2);
       tlvPacket.value[2].value.length.should.equal(2);
       tlvPacket.value[2].value[0].tag.should.equal(0x80);
-      tlvPacket.value[2].value[0].value.should.deep.equal(new Buffer([0x01]));
+      tlvPacket.value[2].value[0].value.should.deep.equal(new Buffer([0x00]));
       tlvPacket.value[2].value[1].tag.should.equal(0xA0);
     });
   });
@@ -173,8 +173,13 @@ describe('DeviceManager', function() {
     it('should discover devices on available connectors', function(done) {
 			var dm = new DeviceManager({});
       dm._connectorLoader.loadedModules['mock'] = mock_connector;
+      var deviceCount = 3;
       dm.discoverDevices(function(device) {
-        done();
+        deviceCount--;
+        
+        if (!deviceCount) {
+          done();          
+        }
       });
     });
   });

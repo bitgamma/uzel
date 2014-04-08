@@ -1,0 +1,35 @@
+.navbar-uzel {
+  background-color: rgb(67, 172, 106);
+  color: white;
+}
+
+.nav-arrow, .nav-arrow:hover, .nav-arrow:visited {
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 5px;
+  line-height: 45px;
+  font-size: 14pt;
+  top: 0px;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-label {
+  font-size: 18pt;
+  margin-left: 10px;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.nav-arrow:hover {
+  background-color: rgb(27, 132, 66);
+}
+
+.nav-title {
+  position: absolute;
+  line-height: 45px;
+  font-size: 18pt;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+

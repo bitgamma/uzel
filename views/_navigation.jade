@@ -1,0 +1,5 @@
+mixin nav(toUrl, toLabel, title)
+  nav.navbar.navbar-uzel(role="navigation")
+    .nav-title.hidden-xs #{title}  
+    a(href="#{toUrl}").glyphicon.glyphicon-chevron-left.nav-arrow 
+      span.nav-label #{toLabel}

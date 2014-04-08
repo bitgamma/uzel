@@ -1,0 +1,45 @@
+mixin deviceObject(deviceIcon, deviceName, deviceManufacturer, deviceType, batteryStatus, imgType)
+  .col-md-6.col-sm-6.col-xs-12.device-container
+    .inner-device-container
+      img(src="#{deviceIcon}", alt="#{deviceType} Icon", width="128", height="128", class="device-icon #{imgType}")
+      .device-info
+        h4.device-name #{deviceName}
+        p
+          sub #{deviceManufacturer}
+        p.hidden-xs.hidden-sm
+          small
+            strong Device Type:&nbsp;
+            |#{deviceType} 
+        p.hidden-xs
+          small 
+            strong Battery Status:&nbsp;
+            |#{batteryStatus}
+
+doctype html
+html(lang="en")
+  head
+    title Uzel v0.0.1 | Device Manager
+    link(rel="stylesheet", href="/bower_components/bootswatch/yeti/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/main.css")  
+    link(rel="stylesheet", href="/css/dm.css")  
+  body
+    include ./_navigation.jade
+    +nav("/", "Home", "Device Manager")
+    .container
+      h2.caption Paired Devices
+      .row
+        +deviceObject("/img/devices/0001.svg", "Foo Thermometer", "Foo Industries Inc.", "Temperature Sensor", "56%", "device-paired")
+        +deviceObject("/img/devices/0001.svg", "Easy Thermometer", "Easy Inc.", "Temperature Sensor", "Unknown", "device-paired")
+      .row
+        +deviceObject("/img/devices/0001.svg", "Easy Thermometer", "Easy Inc.", "Temperature Sensor", "Unknown", "device-paired")
+        +deviceObject("/img/devices/0001.svg", "Bar Thermometer", "Bar Industries Inc.", "Temperature Sensor", "56%", "device-paired")    
+      h2.caption Unpaired Devices
+        a(href="#").glyphicon.glyphicon-refresh.refresh-unpaired
+      .row
+        +deviceObject("/img/devices/0001.svg", "Foo Thermometer", "Foo Industries Inc.", "Temperature Sensor", "56%", "device-unpaired")
+        +deviceObject("/img/devices/0001.svg", "Easy Thermometer", "Easy Inc.", "Temperature Sensor", "Unknown", "device-unpaired")
+      .row
+        +deviceObject("/img/devices/0001.svg", "Easy Thermometer", "Easy Inc.", "Temperature Sensor", "Unknown", "device-unpaired")
+        +deviceObject("/img/devices/0001.svg", "Bar Thermometer", "Bar Industries Inc.", "Temperature Sensor", "56%", "device-unpaired") 
+      br
+      br  

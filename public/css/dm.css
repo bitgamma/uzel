@@ -1,0 +1,50 @@
+.caption {
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+
+.device-container {
+  position: relative;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.inner-device-container {
+  height: 128px;
+  background-color: rgb(245, 245, 245);  
+}
+
+.device-icon {
+  position: absolute;
+  padding: 20px;
+}
+
+.device-name {
+  margin-bottom: 0px;
+}
+
+.device-info {
+  position: absolute;
+  width: 90%;
+  margin: auto;
+  padding-left: 143px;
+  display: inline-block;
+}
+
+.device-paired {
+  background-color: rgb(67, 172, 106);
+}
+
+.device-unpaired {
+  background-color: rgb(172, 67, 106);
+}
+
+.refresh-unpaired {
+  color: rgb(67, 172, 106);
+  margin-left: 20px;
+}
+
+.refresh-unpaired:hover {
+  text-decoration: none;
+  color: rgb(27, 132, 66);
+}

@@ -1,66 +1,26 @@
-var deviceManager = angular.module('deviceManager', []);
+var deviceManager = angular.module('deviceManager', [
+  'btford.socket-io'
+]).factory('deviceSocket', function (socketFactory) {
+  var deviceIOSocket = io.connect('/devices');
+
+  deviceSocket = socketFactory({
+    ioSocket: deviceIOSocket
+  });
+
+  return deviceSocket;
+});
  
-deviceManager.controller('DeviceController', function ($scope) {
-  $scope.pairedDevices = [
-  {
-    'name': 'Easy Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Easy Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '56%'
-  },
-  {
-    'name': 'Foo Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Foo Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '96%'
-  },
-  {
-    'name': 'Baa Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Baa Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '0%'
-  },
-  {
-    'name': 'Nal Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Nal Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '70%'
-  },
-  ];
+deviceManager.controller('DeviceController', function ($scope, deviceSocket) {  
+  $scope.discoverDevices = function() {
+    deviceSocket.emit('discoverDevices');
+  }
   
-  $scope.unpairedDevices = [
-  {
-    'name': 'Easy Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Easy Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '66%'
-  },
-  {
-    'name': 'Foo Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Foo Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '45%'
-  },
-  {
-    'name': 'Baa Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Baa Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': '10%'
-  },
-  {
-    'name': 'Nal Thermometer',
-    'type': 'Temperature Sensor',
-    'manufacturer': 'Nal Inc.',
-    'icon': '/img/devices/0001.svg',
-    'batteryStatus': 'Unknown'
-  },
-  ];
+  deviceSocket.on('init', function(data) {
+    $scope.pairedDevices = data.pairedDevices; 
+    $scope.unpairedDevices = data.unpairedDevices; 
+  });
   
+  deviceSocket.on('deviceDiscovered', function(device) {
+    $scope.unpairedDevices.push(device);
+  });
 });

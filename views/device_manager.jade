@@ -1,4 +1,5 @@
 mixin deviceObject(arr, imgType)
+  .col-md-12.col-sm-12.col-xs-12.no-devices(data-ng-show="!#{arr}.length") No devices found
   .col-md-6.col-sm-6.col-xs-12.device-container(data-ng-repeat="device in #{arr}")
     .inner-device-container
       img(src="{{device.icon}}", alt="{{device.type}} Icon", width="128", height="128", class="device-icon #{imgType}")
@@ -10,10 +11,6 @@ mixin deviceObject(arr, imgType)
           small
             strong Device Type:&nbsp;
             |{{device.type}}
-        p.hidden-xs
-          small 
-            strong Battery Status:&nbsp;
-            |{{device.batteryStatus}}
 
 doctype html
 html(lang="en", data-ng-app="deviceManager")
@@ -22,7 +19,9 @@ html(lang="en", data-ng-app="deviceManager")
     link(rel="stylesheet", href="/bower_components/bootswatch/yeti/bootstrap.min.css")
     link(rel="stylesheet", href="/css/main.css")  
     link(rel="stylesheet", href="/css/dm.css")  
+    script(src='/socket.io/socket.io.js')
     script(src='/bower_components/angular/angular.min.js')
+    script(src='/bower_components/angular-socket-io/socket.min.js')
     script(src='/js/device_manager.js')
   body(data-ng-controller="DeviceController")
     include ./_navigation.jade
@@ -32,7 +31,7 @@ html(lang="en", data-ng-app="deviceManager")
       .row
         +deviceObject("pairedDevices", "device-paired")
       h2.caption Unpaired Devices
-        a(href="#").glyphicon.glyphicon-refresh.refresh-unpaired
+        a(href="", data-ng-click="discoverDevices()").glyphicon.glyphicon-refresh.refresh-unpaired
       .row
         +deviceObject("unpairedDevices", "device-unpaired")
       br

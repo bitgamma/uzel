@@ -39,9 +39,10 @@
   background-color: rgb(172, 67, 106);
 }
 
-.refresh-unpaired {
+.refresh-unpaired, .refresh-unpaired:visited {
   color: rgb(67, 172, 106);
   margin-left: 20px;
+  text-decoration: none;
 }
 
 .refresh-unpaired:hover {
@@ -50,5 +51,35 @@
 }
 
 .no-devices {
-  
+  font-size: 10pt;
+  padding-left: 40px;
 }
+
+@media (min-width: 1200px) {
+  .pair-unpair-button {
+    margin-top: 50px;
+  }
+}
+
+.btn-pair {
+  background-color: rgb(67, 172, 106);
+  color: white;
+  min-width: 57px;
+}
+
+.btn-pair:hover {
+  background-color: rgb(27, 132, 66);
+  color: white;
+}
+
+.btn-unpair {
+  background-color: rgb(172, 67, 106);
+  color: white;
+  min-width: 57px;
+}
+
+.btn-unpair:hover {
+  background-color: rgb(132, 27, 66);
+  color: white;
+}
+

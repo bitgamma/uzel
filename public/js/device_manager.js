@@ -15,6 +15,14 @@ deviceManager.controller('DeviceController', function ($scope, deviceSocket) {
     deviceSocket.emit('discoverDevices');
   }
   
+  $scope.pairDevice = function(device) {
+    deviceSocket.emit('pairDevice', device);
+  }
+  
+  $scope.unpairDevice = function(device) {
+    deviceSocket.emit('unpairDevice', device);
+  }
+  
   deviceSocket.on('init', function(data) {
     $scope.pairedDevices = data.pairedDevices; 
     $scope.unpairedDevices = data.unpairedDevices; 
@@ -22,5 +30,15 @@ deviceManager.controller('DeviceController', function ($scope, deviceSocket) {
   
   deviceSocket.on('deviceDiscovered', function(device) {
     $scope.unpairedDevices.push(device);
+  });
+  
+  deviceSocket.on('devicePaired', function(device) {
+    $scope.pairedDevices.push(device);
+    $scope.unpairedDevices = $scope.unpairedDevices.filter(function(dev) { dev.id != device.id });
+  });
+  
+  deviceSocket.on('deviceUnpaired', function(device) {
+    $scope.unpairedDevices.push(device);
+    $scope.pairedDevices = $scope.pairedDevices.filter(function(dev) { dev.id != device.id });
   });
 });

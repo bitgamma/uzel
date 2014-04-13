@@ -1,17 +1,22 @@
-mixin deviceObject(arr, imgType)
+mixin deviceObject(arr, imgType, btnType, btnLabel, func)
   .col-md-12.col-sm-12.col-xs-12.no-devices(data-ng-show="!#{arr}.length") No devices found
   .col-md-6.col-sm-6.col-xs-12.device-container(data-ng-repeat="device in #{arr}")
     .inner-device-container
       img(src="{{device.icon}}", alt="{{device.type}} Icon", width="128", height="128", class="device-icon #{imgType}")
       .device-info
-        h4.device-name {{device.name}}
-        p
-          sub {{device.manufacturer}}
-        p.hidden-xs.hidden-sm
-          small
-            strong Device Type:&nbsp;
-            |{{device.type}}
-
+        .row
+          .col-lg-10.col-sm-12.col-xs-12
+            h4.device-name {{device.name}}
+            p
+              sub {{device.manufacturer}}
+            p.hidden-xs.hidden-sm
+              small
+                strong Device Type:&nbsp;
+                |{{device.type}}
+          .col-lg-2.col-sm-12.col-xs-12
+            .pair-unpair-button
+              a(href="", data-ng-click="#{func}(device)", class="btn #{btnType} btn-xs") #{btnLabel}
+      
 doctype html
 html(lang="en", data-ng-app="deviceManager")
   head
@@ -29,10 +34,10 @@ html(lang="en", data-ng-app="deviceManager")
     .container
       h2.caption Paired Devices
       .row
-        +deviceObject("pairedDevices", "device-paired")
+        +deviceObject("pairedDevices", "device-paired", "btn-unpair", "Unpair", "unpairDevice")
       h2.caption Unpaired Devices
         a(href="", data-ng-click="discoverDevices()").glyphicon.glyphicon-refresh.refresh-unpaired
       .row
-        +deviceObject("unpairedDevices", "device-unpaired")
+        +deviceObject("unpairedDevices", "device-unpaired", "btn-pair", "Pair", "pairDevice")
       br
       br  

@@ -3,7 +3,7 @@ var app;
 var appMgr;
 var devMgr;
 
-var units = ["Kelvin", "Celsius", "Fahrenhet"];
+var monitoredDevices = [ { "name": "Foo Thermometer", "value": "20 C" }];
 
 exports.createAppliance = function(applianceManager) {
   if (!app) {
@@ -14,6 +14,8 @@ exports.createAppliance = function(applianceManager) {
     appMgr = applianceManager;
     devMgr = appMgr.deviceManager;
     app.get('/', index);
+    appMgr.io.of('/dashboard').on('connection', handleDashboardSocketConnection);
+    
   }
   
   return app;
@@ -21,4 +23,8 @@ exports.createAppliance = function(applianceManager) {
 
 function index(req, res) {
   res.render('index.jade', { });
+}
+
+function handleDashboardSocketConnection(socket) {
+  socket.emit('init', monitoredDevices);
 }

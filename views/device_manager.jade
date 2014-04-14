@@ -15,7 +15,7 @@ mixin deviceObject(arr, imgType, btnType, btnLabel, func)
                 |{{device.type}}
           .col-lg-2.col-sm-12.col-xs-12
             .pair-unpair-button
-              a(href="", data-ng-click="#{func}(device)", class="btn #{btnType} btn-xs") #{btnLabel}
+              a(href="", data-ng-click="#{func}(device)", class="btn #{btnType} btn-pairunpair btn-xs") #{btnLabel}
       
 doctype html
 html(lang="en", data-ng-app="deviceManager")
@@ -34,10 +34,10 @@ html(lang="en", data-ng-app="deviceManager")
     .container
       h2.caption Paired Devices
       .row
-        +deviceObject("pairedDevices", "device-paired", "btn-unpair", "Unpair", "unpairDevice")
+        +deviceObject("pairedDevices", "device-paired", "btn-cancel", "Unpair", "unpairDevice")
       h2.caption Unpaired Devices
         a(href="", data-ng-click="discoverDevices()").glyphicon.glyphicon-refresh.refresh-unpaired
       .row
-        +deviceObject("unpairedDevices", "device-unpaired", "btn-pair", "Pair", "pairDevice")
+        +deviceObject("unpairedDevices", "device-unpaired", "btn-confirm", "Pair", "pairDevice")
       br
       br  

@@ -22,6 +22,7 @@
 
 .board-data {
   font-size: 72pt;
+  overflow: scroll;
   text-align: center;
   letter-spacing: -8px;
   background-color: rgb(67, 172, 106);
@@ -51,4 +52,76 @@
 
 .remove-device:hover {
   color: rgb(132, 27, 66) !important;
+}
+
+.device-selector {
+  height: 280px;
+  border-style: solid;
+  border-width: 3px;
+  border-color: rgb(67, 172, 106);
+  padding: 20px;
+}
+
+.add-device {
+  background-color: rgb(67, 172, 106);
+  color: white;
+  text-align: center;
+  height: 280px;
+  cursor: pointer;
+}
+
+.add-device:hover {
+  background-color: rgb(27, 132, 66);
+}
+
+.add-btn {
+  font-size: 90pt;
+  padding-top: 50px;
+  padding-bottom: 10px;
+}
+
+.add-label {
+  font-size: 24pt;
+}
+
+.btn-size {
+  min-width: 105px;
+}
+
+.add-dev-label {
+  font-size: 12pt;
+}
+
+
+
+.add-device.ng-animate { 
+    -webkit-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -moz-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -ms-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -o-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    position: relative;
+    display: block;
+} 
+ 
+.add-device.ng-leave.ng-leave-active,
+.add-device.ng-enter {
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+    opacity: 0;
+    height: 0px;
+}        
+ 
+.add-device.ng-enter.ng-enter-active,
+.add-device.ng-leave {
+    -webkit-transform: rotateY(0deg);
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+    opacity: 1;
+    height: 30px;
 }

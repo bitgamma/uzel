@@ -1,21 +1,44 @@
 doctype html
-html(lang="en")
+html(lang="en", data-ng-app="dashboard")
   head
     title Uzel | Dashboard
-    link(rel="stylesheet", href="/dashboard/bower_components/bootswatch/yeti/bootstrap.min.css")
+    link(rel="stylesheet", href="/bower_components/bootswatch/yeti/bootstrap.min.css")
     link(rel="stylesheet", href="/css/main.css")
-    link(rel="stylesheet", href="/dashboard/css/index.css")  
-  body
+    link(rel="stylesheet", href="/dashboard/css/index.css") 
+    script(src='/socket.io/socket.io.js')
+    script(src='/bower_components/angular/angular.min.js')
+    script(src='/bower_components/angular-socket-io/socket.min.js')
+    script(src='/dashboard/js/dashboard.js') 
+  body(data-ng-controller="DashboardController")
     include ../../../../views/_navigation.jade
     +nav("/", "Home", "Dashboard")
     .container.dashboard-wrapper
       .row
-        .col-md-4.col-sm-6.col-xs-12
+        .col-md-4.col-sm-6.col-xs-12(data-ng-repeat="device in monitoredDevices")
           .device-info-board
-            p.board-heading Foo Thermometer
-            p.board-data 10&deg; C
+            p.board-heading {{device.name}}
+            p.board-data {{device.value}}
             .board-controls
               a(href="#").glyphicon.glyphicon-cog 
               | &nbsp;&nbsp;&nbsp;&nbsp;
               a(href="#").glyphicon.glyphicon-refresh
-              a(href="#").glyphicon.glyphicon-remove.pull-right.remove-device
+              a(href="#").glyphicon.glyphicon-remove.pull-right.remove-device  
+        .col-md-4.col-sm-6.col-xs-12(data-ng-switch data-on="addingDevice")
+          .add-device(data-ng-click="$parent.addingDevice = true", data-ng-switch-default)
+            p.glyphicon.glyphicon-plus.add-btn
+            p.add-label Add Device
+          .device-selector(data-ng-switch-when="true")
+            form
+              .form-group
+                label.add-dev-label(for="device-type") Device Type
+                select#device-type.form-control
+                  option Select device type
+                  option All
+              .form-group
+                label.add-dev-label(for="device-selector") Device
+                select#device-selector.form-control
+                  option Select a device
+              br    
+              .form-group
+                span.btn.btn-confirm.pull-left.btn-size Add
+                span.btn.btn-cancel.pull-right.btn-size(data-ng-click="$parent.addingDevice = false") Cancel   

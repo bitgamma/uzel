@@ -1,0 +1,54 @@
+.dashboard-wrapper {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.device-info-board {
+  margin-bottom: 20px;
+  height: 280px;
+  border-style: solid;
+  border-width: 3px;
+  border-color: rgb(67, 172, 106);
+}
+
+.board-heading {
+  font-size: 18pt; 
+  text-align: center;
+  padding-bottom: 10px;
+  color: rgb(67, 172, 106);
+  height: 20%;
+  padding-top: 10px;
+}
+
+.board-data {
+  font-size: 72pt;
+  text-align: center;
+  letter-spacing: -8px;
+  background-color: rgb(67, 172, 106);
+  color: white;
+  height: 55%;
+}
+
+.board-controls {
+  font-size: 26pt;
+  height: 20%;  
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.board-controls a, .board-controls a:hover, .board-controls a:visited {
+  color: rgb(67, 172, 106);
+  text-decoration: none;
+}
+
+.remove-device, .remove-device:visited {
+  color: rgb(172, 67, 106) !important;
+}
+
+.board-controls a:hover {
+  color: rgb(27, 132, 66);
+}
+
+.remove-device:hover {
+  color: rgb(132, 27, 66) !important;
+}

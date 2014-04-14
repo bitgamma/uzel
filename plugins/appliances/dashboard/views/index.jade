@@ -1,0 +1,21 @@
+doctype html
+html(lang="en")
+  head
+    title Uzel | Dashboard
+    link(rel="stylesheet", href="/dashboard/bower_components/bootswatch/yeti/bootstrap.min.css")
+    link(rel="stylesheet", href="/css/main.css")
+    link(rel="stylesheet", href="/dashboard/css/index.css")  
+  body
+    include ../../../../views/_navigation.jade
+    +nav("/", "Home", "Dashboard")
+    .container.dashboard-wrapper
+      .row
+        .col-md-4.col-sm-6.col-xs-12
+          .device-info-board
+            p.board-heading Foo Thermometer
+            p.board-data 10&deg; C
+            .board-controls
+              a(href="#").glyphicon.glyphicon-cog 
+              | &nbsp;&nbsp;&nbsp;&nbsp;
+              a(href="#").glyphicon.glyphicon-refresh
+              a(href="#").glyphicon.glyphicon-remove.pull-right.remove-device

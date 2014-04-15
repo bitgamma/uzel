@@ -32,14 +32,13 @@ html(lang="en", data-ng-app="dashboard")
             form
               .form-group
                 label.add-dev-label(for="device-type") Device Type
-                select#device-type.form-control
-                  option Select device type
-                  option All
+                select#device-type.form-control(data-ng-model="$parent.deviceType", data-ng-change="selectDeviceType()", data-ng-options="devType.name for devType in deviceTypes")
+                  option(value="") Select device type
               .form-group
                 label.add-dev-label(for="device-selector") Device
-                select#device-selector.form-control
-                  option Select a device
+                select#device-selector.form-control(data-ng-model="$parent.deviceToAdd", data-ng-options="dev.name for dev in availableDevices")
+                  option(value="") Select a device
               br    
               .form-group
-                span.btn.btn-confirm.pull-left.btn-size Add
-                span.btn.btn-cancel.pull-right.btn-size(data-ng-click="$parent.addingDevice = false") Cancel   
+                span.btn.btn-confirm.pull-left.btn-size(data-ng-click="addDevice()") Add
+                span.btn.btn-cancel.pull-right.btn-size(data-ng-click="resetAddForm()") Cancel   

@@ -7,6 +7,7 @@ html(lang="en", data-ng-app="dashboard")
     link(rel="stylesheet", href="/dashboard/css/index.css") 
     script(src='/socket.io/socket.io.js')
     script(src='/bower_components/angular/angular.min.js')
+    script(src='/bower_components/angular-animate/angular-animate.min.js')
     script(src='/bower_components/angular-socket-io/socket.min.js')
     script(src='/dashboard/js/dashboard.js') 
   body(data-ng-controller="DashboardController")
@@ -24,10 +25,10 @@ html(lang="en", data-ng-app="dashboard")
               a(href="#").glyphicon.glyphicon-refresh
               a(href="#").glyphicon.glyphicon-remove.pull-right.remove-device  
         .col-md-4.col-sm-6.col-xs-12(data-ng-switch data-on="addingDevice")
-          .add-device(data-ng-click="$parent.addingDevice = true", data-ng-switch-default)
+          .add-device.add-dev-animate(data-ng-click="$parent.addingDevice = true", data-ng-switch-default)
             p.glyphicon.glyphicon-plus.add-btn
             p.add-label Add Device
-          .device-selector(data-ng-switch-when="true")
+          .device-selector.add-dev-animate(data-ng-switch-when="true")
             form
               .form-group
                 label.add-dev-label(for="device-type") Device Type

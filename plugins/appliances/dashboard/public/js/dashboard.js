@@ -1,5 +1,6 @@
 var dashboard = angular.module('dashboard', [
-  'btford.socket-io'
+  'btford.socket-io',
+  'ngAnimate'
 ]).factory('dashboardSocket', function (socketFactory) {
   var dashboardIOSocket = io.connect('/dashboard');
 

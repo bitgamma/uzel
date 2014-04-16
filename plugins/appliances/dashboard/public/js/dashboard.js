@@ -28,8 +28,22 @@ dashboard.controller('DashboardController', function ($scope, $http, dashboardSo
     $scope.monitoredDevices = monitoredDevices; 
   });
   
-  dashboardSocket.on('addedDevice', function(device) {
+  dashboardSocket.on('deviceAdded', function(device) {
     $scope.monitoredDevices.push(device); 
+  });
+  
+  dashboardSocket.on('deviceRemoved', function(deviceID) {
+    $scope.monitoredDevices = $scope.monitoredDevices.filter(function(dev) { 
+      return dev.id != deviceID;
+    });
+  });
+  
+  dashboardSocket.on('deviceUpdated', function(deviceID, value) {
+    var updatedDevice = $scope.monitoredDevices.find(function(dev) { 
+      return dev.id == deviceID;
+    });
+    
+    updatedDevice.value = value;
   });
   
   $http.get('/dashboard/getSupportedTypes').success(function(data) {
@@ -49,5 +63,13 @@ dashboard.controller('DashboardController', function ($scope, $http, dashboardSo
       dashboardSocket.emit('addMonitoredDevice', $scope.deviceToAdd.id);
       $scope.resetAddForm();
     }
+  };
+  
+  $scope.removeDevice = function(device) {
+    dashboardSocket.emit('removeDevice', device.id);
+  };
+  
+  $scope.updateDevice = function(device) {
+    dashboardSocket.emit('updateDevice', device.id);
   };
 });

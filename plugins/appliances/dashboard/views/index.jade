@@ -5,6 +5,7 @@ html(lang="en", data-ng-app="dashboard")
     link(rel="stylesheet", href="/bower_components/bootswatch/yeti/bootstrap.min.css")
     link(rel="stylesheet", href="/css/main.css")
     link(rel="stylesheet", href="/dashboard/css/index.css") 
+    script(src='/bower_components/es6-shim/es6-shim.js')
     script(src='/socket.io/socket.io.js')
     script(src='/bower_components/angular/angular.min.js')
     script(src='/bower_components/angular-animate/angular-animate.min.js')
@@ -22,8 +23,8 @@ html(lang="en", data-ng-app="dashboard")
             .board-controls
               a(href="#").glyphicon.glyphicon-cog 
               | &nbsp;&nbsp;&nbsp;&nbsp;
-              a(href="#").glyphicon.glyphicon-refresh
-              a(href="#").glyphicon.glyphicon-remove.pull-right.remove-device  
+              a(href="#", data-ng-click="updateDevice(device)").glyphicon.glyphicon-refresh 
+              a(href="#", data-ng-click="removeDevice(device)").glyphicon.glyphicon-remove.pull-right.remove-device  
         .col-md-4.col-sm-6.col-xs-12(data-ng-switch data-on="addingDevice")
           .add-device.add-dev-animate(data-ng-click="$parent.addingDevice = true", data-ng-switch-default)
             p.glyphicon.glyphicon-plus.add-btn

@@ -1,3 +1,5 @@
+require('es6-shim');
+
 var express = require('express');
 var app;
 var appMgr;
@@ -22,9 +24,8 @@ exports.createAppliance = function(applianceManager) {
     
     //TODO: fill this array through plugins
     supportedTypes = [
-      { 'name': 'All', 'value': [ devMgr.DeviceType.TEMPERATURE_SENSOR, devMgr.DeviceType.MOISTURE_SENSOR ] },
+      { 'name': 'All', 'value': [ devMgr.DeviceType.TEMPERATURE_SENSOR ] },
       { 'name': 'Temperature Sensor', 'value': [ devMgr.DeviceType.TEMPERATURE_SENSOR ] },
-      { 'name': 'Moisture Sensor', 'value': [ devMgr.DeviceType.MOISTURE_SENSOR ] },
     ];
   }
   
@@ -47,19 +48,58 @@ function getSupportedTypes(req, res) {
 
 
 function handleDashboardSocketConnection(socket) {
-  socket.emit('init', monitoredDevices);
-  socket.on('addMonitoredDevice', addMonitoredDevice.bind(null, socket));
+  socket.emit('init', monitoredDevices.map(deviceDescriptor));
+  socket.on('addMonitoredDevice', addMonitoredDevice);
+  socket.on('removeDevice', removeDevice);
+  socket.on('updateDevice', updateDevice);
 }
 
-function addMonitoredDevice(socket, deviceID) {
+function addMonitoredDevice(deviceID) {
   var device = devMgr.getDeviceByFullID(deviceID);
   
   if (device) {
     monitoredDevices.push(device);
-    appMgr.io.of('/dashboard').emit('addedDevice', device);
+    getUpdatedDeviceData(device);
+    appMgr.io.of('/dashboard').emit('deviceAdded', deviceDescriptor(device));
   }
 }
 
+function removeDevice(deviceID) {
+  monitoredDevices = monitoredDevices.filter(function(dev) { 
+    return dev.id != deviceID;
+  });
+  
+  appMgr.io.of('/dashboard').emit('deviceRemoved', deviceID);  
+}
+
+function updateDevice(deviceID) {
+  var device = devMgr.getDeviceByFullID(deviceID);
+  
+  if (device) {
+    getUpdatedDeviceData(device);
+  }
+}
+
+function getUpdatedDeviceData(device) {
+  //TODO: here registered plugins should be able to query data depending on types
+  if (device.deviceInfo.type == devMgr.DeviceType.TEMPERATURE_SENSOR) {
+    devMgr.getData(device, handleTemperatureDataReceived.bind(null, processFormattedResponse));
+  }
+}
+
+function processFormattedResponse(command, formattedResponse) {
+  appMgr.io.of('/dashboard').emit('deviceUpdated', command.device.getFullID(), formattedResponse);  
+}
+
+function handleTemperatureDataReceived(cb, command, response) {
+  var units = ['K', 'C', 'F'];
+  var thermoData = response.getFirstChild(0xA1);
+
+  var temperature = thermoData.getFirstChild(0x82).getIntValue() / thermoData.getFirstChild(0x81).getUIntValue();
+  var unit = thermoData.getFirstChild(0x80).getUIntValue();
+  cb(command, temperature + ' ' + units[unit]);
+}
+
 function deviceDescriptor(device) {
-  return { 'id': device.getFullID(), 'name': device.deviceInfo.name };
+  return { 'id': device.getFullID(), 'name': device.deviceInfo.name, 'value': '...' };
 }

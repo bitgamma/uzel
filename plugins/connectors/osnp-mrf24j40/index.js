@@ -45,7 +45,7 @@ exports.discoverDevices = function(cb) {
   var discoveredDevices = [];
   
   if (radio) {
-    discoveredDevices = [ new OSNPProtocolInfo(new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], new Buffer([0xef, 0xbe]))];
+    discoveredDevices = [ new OSNPProtocolInfo(new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]), new Buffer([0xef, 0xbe]))];
   }
 
   for(var i = 0, len = discoveredDevices.length; i < len; i++) {

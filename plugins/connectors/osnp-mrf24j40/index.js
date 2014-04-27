@@ -58,7 +58,7 @@ exports.send = function(device, data, cb) {
   var frameControlLow = osnp.makeFrameControlLow(FrameType.DATA, false, false, true, true);
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, 0x00, AddressingMode.SHORT_ADDRESS);
   
-  var frame = osnp.createFrame(frameControlLow, frameControlLow);
+  var frame = osnp.createFrame(frameControlLow, frameControlHigh);
   frame.destinationAddress = device.protocolInfo.shortAddress;
   frame.payload = data;
   

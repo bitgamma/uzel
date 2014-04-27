@@ -71,7 +71,7 @@ function trySend() {
   if (!transmissionPending && (frameQueue.length > 0)) {
     var frame = frameQueue.shift();
     transmissionPending = true;
-    radio.transmit(frame);
+    radio.transmit(frame.encode());
   }
 }
 

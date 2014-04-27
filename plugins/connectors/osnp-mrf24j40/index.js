@@ -55,8 +55,8 @@ exports.discoverDevices = function(cb) {
 }
 
 exports.send = function(device, data, cb) {  
-  var frameControlLow = makeFrameControlLow(FrameType.DATA, false, false, true, true);
-  var frameControlHigh = makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, 0x00, AddressingMode.SHORT_ADDRESS);
+  var frameControlLow = osnp.makeFrameControlLow(FrameType.DATA, false, false, true, true);
+  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, 0x00, AddressingMode.SHORT_ADDRESS);
   
   var frame = osnp.createFrame(frameControlLow, frameControlLow);
   frame.destination = device.protocolInfo.shortAddress;

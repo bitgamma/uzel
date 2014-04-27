@@ -59,7 +59,7 @@ exports.send = function(device, data, cb) {
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, 0x00, AddressingMode.SHORT_ADDRESS);
   
   var frame = osnp.createFrame(frameControlLow, frameControlLow);
-  frame.destination = device.protocolInfo.shortAddress;
+  frame.destinationAddress = device.protocolInfo.shortAddress;
   frame.payload = data;
   
   frameQueue.push(frame);
@@ -70,7 +70,7 @@ exports.send = function(device, data, cb) {
 function trySend() {
   if (!transmissionPending && (frameQueue.length > 0)) {
     var frame = frameQueue.shift();
-    transmissionPending = true;
+    transmissionPending = frame;
     radio.transmit(frame.encode());
   }
 }
@@ -87,7 +87,13 @@ function handleReceived(rawFrame, lqi, rssi) {
 }
 
 function handleTransmitted(txErr, ccaErr) {
-  transmissionPending = false;
+  if(ccaErr) {
+    frameQueue.push(transmissionPending);
+  } else if (txErr) {
+    delete cbCache[transmissionPending.destinationAddress.toString('hex')];    
+  }
+  
+  transmissionPending = null;
   trySend();
 }
 

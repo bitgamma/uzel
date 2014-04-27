@@ -5,6 +5,7 @@ var FIFO = mrf24j40.FIFO;
 
 var osnp = require('node-osnp');
 var FrameType = osnp.FrameType;
+var FrameVersion = osnp.FrameVersion;
 var AddressingMode = osnp.AddressingMode;
 
 var radio;
@@ -56,7 +57,7 @@ exports.discoverDevices = function(cb) {
 
 exports.send = function(device, data, cb) {  
   var frameControlLow = osnp.makeFrameControlLow(FrameType.DATA, false, false, true, true);
-  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, 0x00, AddressingMode.SHORT_ADDRESS);
+  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.SHORT_ADDRESS);
   
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
   frame.destinationAddress = device.protocolInfo.shortAddress;
@@ -71,7 +72,12 @@ function trySend() {
   if (!transmissionPending && (frameQueue.length > 0)) {
     var frame = frameQueue.shift();
     transmissionPending = frame;
-    radio.transmit(frame.encode());
+    var frameLength = frame.getEncodedLength();
+    var buf = new Buffer(frameLength + 2);
+    buf[0] = frameLength - frame.payload.length;
+    buf[1] = frameLength;
+    frame.encode(buf.slice(2));
+    radio.transmit(buf);
   }
 }
 

@@ -66,6 +66,7 @@ exports.unpair = function(device, cb) {
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
   
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
+  frame.destinationPAN = osnp.getPANID();
   frame.destinationAddress = device.protocolInfo.shortAddress;
   frame.payload = new Buffer([MACCommand.DISASSOCIATED]);
   frameQueue.push(frame);
@@ -92,6 +93,7 @@ exports.send = function(device, data, cb) {
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
   
   if (device.paired) {
+    frame.destinationPAN = osnp.getPANID();
     frame.destinationAddress = device.protocolInfo.shortAddress;    
   } else {
     frame.destinationPAN = new Buffer([0x00, 0x00]);   

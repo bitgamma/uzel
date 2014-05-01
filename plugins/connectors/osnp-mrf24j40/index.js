@@ -115,9 +115,9 @@ function sendDiscoveryFrame() {
   frameQueue.push(frame);
   trySend();
   
-  if (deviceDiscoveryPeriods < 100) {
+  if (deviceDiscoveryPeriods < 1000) {
     deviceDiscoveryPeriods++;
-    setTimeout(sendDiscoveryFrame, 100);
+    setTimeout(sendDiscoveryFrame, 250);
   }
 }
 

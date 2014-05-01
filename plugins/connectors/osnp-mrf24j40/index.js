@@ -39,7 +39,7 @@ exports.start = function() {
     radio.setPANCoordinator();
     radio.setPANID(osnp.getPANID());
     radio.setShortAddress(osnp.getShortAddress());      
-    radio.setChannel(15);
+    radio.setChannel(2);
   }
 }
 

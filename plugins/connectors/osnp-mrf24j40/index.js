@@ -46,7 +46,7 @@ exports.start = function() {
 exports.pair = function(device, pairingData, cb) {
   pairingCallback = cb.bind(device);
   var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, true, false);
-  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
+  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.SHORT);
   
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
   frame.destinationPAN = new Buffer([0x00, 0x00]);   

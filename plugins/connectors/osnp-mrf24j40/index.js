@@ -117,7 +117,7 @@ function sendDiscoveryFrame() {
   
   if (deviceDiscoveryPeriods < 100) {
     deviceDiscoveryPeriods++;
-    setTimeout(100, sendDiscoveryFrame);
+    setTimeout(sendDiscoveryFrame, 100);
   }
 }
 

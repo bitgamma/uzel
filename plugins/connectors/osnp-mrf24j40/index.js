@@ -52,7 +52,7 @@ exports.pair = function(device, pairingData, cb) {
   frame.destinationAddress = device.protocolInfo.eui;
   
   device.protocolInfo.shortAddress = new Buffer(2);
-  device.protocolInfo.shortAddress.writeUInt16LE(nextFreeShortAddress++);
+  device.protocolInfo.shortAddress.writeUInt16LE(nextFreeShortAddress++, 0);
   
   frame.payload = new Buffer([MACCommand.ASSOCIATION_REQUEST, device.protocolInfo.shortAddress[0], device.protocolInfo.shortAddress[1]]);
   frameQueue.push(frame);

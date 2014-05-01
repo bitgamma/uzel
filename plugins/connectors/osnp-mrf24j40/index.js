@@ -49,6 +49,7 @@ exports.pair = function(device, pairingData, cb) {
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
   
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
+  frame.destinationPAN = new Buffer([0x00, 0x00]);   
   frame.destinationAddress = device.protocolInfo.eui;
   
   device.protocolInfo.shortAddress = new Buffer(2);
@@ -115,7 +116,7 @@ function sendDiscoveryFrame() {
   frameQueue.push(frame);
   trySend();
   
-  if (deviceDiscoveryPeriods < 1000) {
+  if (deviceDiscoveryPeriods < 240) {
     deviceDiscoveryPeriods++;
     setTimeout(sendDiscoveryFrame, 250);
   }

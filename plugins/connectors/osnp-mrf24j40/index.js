@@ -54,7 +54,7 @@ exports.pair = function(device, pairingData, cb) {
   device.protocolInfo.shortAddress = new Buffer(2);
   device.protocolInfo.shortAddress.writeUInt16LE(nextFreeShortAddress++);
   
-  frame.payload = new Buffer([MACCommand.DISASSOCIATED, device.protocolInfo.shortAddress[0], device.protocolInfo.shortAddress[1]]);
+  frame.payload = new Buffer([MACCommand.ASSOCIATION_REQUEST, device.protocolInfo.shortAddress[0], device.protocolInfo.shortAddress[1]]);
   frameQueue.push(frame);
   trySend();
 }
@@ -142,7 +142,8 @@ function handleMACFrame(frame) {
   case MACCommand.DATA_REQUEST:
     break;
   case MACCommand.DISCOVER:
-    discoveryCallback(new OSNPProtocolInfo(frame.sourceAddress));
+    var protocolInfo = new OSNPProtocolInfo(frame.sourceAddress);
+    discoveryCallback(protocolInfo.toID(), protocolInfo);
     break;
   }
 }

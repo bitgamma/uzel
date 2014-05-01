@@ -44,7 +44,7 @@ exports.start = function() {
 }
 
 exports.pair = function(device, pairingData, cb) {
-  pairingCallback = cb.bind(device);
+  pairingCallback = cb.bind(null, device);
   var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, true, false);
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.SHORT_ADDRESS);
   
@@ -61,7 +61,7 @@ exports.pair = function(device, pairingData, cb) {
 }
 
 exports.unpair = function(device, cb) {
-  unpairingCallback = cb.bind(device);
+  unpairingCallback = cb.bind(null, device);
   var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, true, false);
   var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
   

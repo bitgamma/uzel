@@ -140,8 +140,8 @@ function handleMACFrame(frame) {
   case MACCommand.ASSOCIATION_RESPONSE:
     //TODO: handle error
     var queue = getQueue(frame.sourceAddress);
-    delete deviceQueues[device.protocolInfo.eui];
     var cmd = queue.deviceResponded();
+    delete deviceQueues[cmd.device.protocolInfo.eui];
     cmd.callback(cmd.device);
     tryDequeue(queue);
     break;

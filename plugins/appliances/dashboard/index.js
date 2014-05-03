@@ -46,7 +46,6 @@ function getSupportedTypes(req, res) {
   res.json(supportedTypes);
 }
 
-
 function handleDashboardSocketConnection(socket) {
   socket.emit('init', monitoredDevices.map(deviceDescriptor));
   socket.on('addMonitoredDevice', addMonitoredDevice);
@@ -66,7 +65,7 @@ function addMonitoredDevice(deviceID) {
 
 function removeDevice(deviceID) {
   monitoredDevices = monitoredDevices.filter(function(dev) { 
-    return dev.id != deviceID;
+    return dev.getFullID() != deviceID;
   });
   
   appMgr.io.of('/dashboard').emit('deviceRemoved', deviceID);  

@@ -142,7 +142,7 @@ function handleMACFrame(frame) {
     var queue = getQueue(frame.sourceAddress);
     delete deviceQueues[queue.device.protocolInfo.eui];
     var cmd = queue.deviceResponded();
-    cmd.callback(cmd.device);
+    cmd.callback(queue.device);
     tryDequeue(queue);
     break;
   case MACCommand.DATA_REQUEST:
@@ -193,7 +193,7 @@ function handleTransmitted(txErr, ccaErr) {
     delete deviceQueues[queue.device.protocolInfo.shortAddress];
     addressTable.free(queue.device.protocolInfo.shortAddress);
     var cmd = queue.deviceResponded();
-    cmd.callback(device);
+    cmd.callback(queue.device);
   }
   
   txFrame = null;

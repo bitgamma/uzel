@@ -74,7 +74,7 @@ exports.unpair = function(device, cb) {
 }
 
 exports.send = function(device, data, cb) {  
-  var frame = osnp.createCommandPacket(device.protocolInfo.eui, device.protocolInfo.shortAddress, device.paired);
+  var frame = osnp.createCommandPacket(data, device.protocolInfo.eui, device.protocolInfo.shortAddress, device.paired);
   addToQueue(frame, device, cb);
 }
 

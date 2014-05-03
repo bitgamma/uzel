@@ -165,7 +165,7 @@ function handleDataFrame(frame) {
 
   var cmd = queue.deviceResponded();
   cmd.callback(frame.payload);
-  tryDequeue(); 
+  tryDequeue(queue); 
 }
 
 function handleReceived(rawFrame, lqi, rssi) {

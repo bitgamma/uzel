@@ -140,8 +140,8 @@ function handleMACFrame(frame) {
   case MACCommand.ASSOCIATION_RESPONSE:
     //TODO: handle error
     var queue = getQueue(frame.sourceAddress);
+    delete deviceQueues[queue.device.protocolInfo.eui];
     var cmd = queue.deviceResponded();
-    delete deviceQueues[cmd.device.protocolInfo.eui];
     cmd.callback(cmd.device);
     tryDequeue(queue);
     break;
@@ -190,10 +190,10 @@ function handleTransmitted(txErr, ccaErr) {
     //TODO: handle error by invoking callback with a proper error code
   } else if (txFrame.payload[0] == MACCommand.DISASSOCIATED) {
     var queue = getQueue(txFrame.destinationAddress);
+    delete deviceQueues[queue.device.protocolInfo.shortAddress];
     addressTable.free(queue.device.protocolInfo.shortAddress);
     var cmd = queue.deviceResponded();
     cmd.callback(device);
-    tryDequeue(queue); 
   }
   
   txFrame = null;

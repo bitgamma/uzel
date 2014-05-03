@@ -168,19 +168,4 @@ describe('DeviceManager', function() {
       sortedCommands.get(secondMockDevice).length.should.equal(1);
     });
   });
-  
-  describe('#discoverDevices', function() {    
-    it('should discover devices on available connectors', function(done) {
-			var dm = new DeviceManager({});
-      dm._connectorLoader.loadedModules['mock'] = mock_connector;
-      var deviceCount = 3;
-      dm.discoverDevices(function(device) {
-        deviceCount--;
-        
-        if (!deviceCount) {
-          done();          
-        }
-      });
-    });
-  });
 });

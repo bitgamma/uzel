@@ -1,9 +1,13 @@
+var events = require('events');
+var util = require('util');
+
 var mrf24j40 = require('node-mrf24j40');
 var MRF24J40 = mrf24j40.MRF24J40;
 var ControlRegister = mrf24j40.ControlRegister;
 var FIFO = mrf24j40.FIFO;
 
 var osnp = require('node-osnp');
+var OSNPAddressTable = osnp.OSNPAddressTable;
 var FrameType = osnp.FrameType;
 var FrameVersion = osnp.FrameVersion;
 var AddressingMode = osnp.AddressingMode;
@@ -15,19 +19,20 @@ var cbCache = {};
 var transmissionPending = null;
 
 var deviceDiscoveryPeriods;
-var discoveryCallback;
 var pairingCallback;
 var unpairingCallback;
 
-var nextFreeShortAddress;
+var addressTable;
+
+util.inherits(exports, events.EventEmitter);
 
 exports.start = function() {
   if (process.platform == 'linux') {
     radio = new MRF24J40('raspi');    
   }
   
-  // This must be persistent and must use a list instead
-  nextFreeShortAddress = 0x0001;
+  // This must be persistent
+  addressTable = new OSNPAddressTable();
 
   osnp.setPANID(new Buffer([0xfe, 0xca]));
   osnp.setShortAddress(new Buffer([0x00, 0x00]));      
@@ -53,7 +58,7 @@ exports.pair = function(device, pairingData, cb) {
   frame.destinationAddress = device.protocolInfo.eui;
   
   device.protocolInfo.shortAddress = new Buffer(2);
-  device.protocolInfo.shortAddress.writeUInt16LE(nextFreeShortAddress++, 0);
+  device.protocolInfo.shortAddress.writeUInt16LE(addressTable.allocate(), 0);
   
   frame.payload = new Buffer([MACCommand.ASSOCIATION_REQUEST, device.protocolInfo.shortAddress[0], device.protocolInfo.shortAddress[1]]);
   frameQueue.push(frame);
@@ -68,14 +73,14 @@ exports.unpair = function(device, cb) {
   var frame = osnp.createFrame(frameControlLow, frameControlHigh);
   frame.destinationPAN = osnp.getPANID();
   frame.destinationAddress = device.protocolInfo.shortAddress;
+  addressTable.free(device.protocolInfo.shortAddress);
   frame.payload = new Buffer([MACCommand.DISASSOCIATED]);
   frameQueue.push(frame);
   trySend();
 }
 
-exports.discoverDevices = function(cb) {
+exports.discoverDevices = function() {
   deviceDiscoveryPeriods = 0;
-  discoveryCallback = cb;
   
   sendDiscoveryFrame();
 }
@@ -121,6 +126,8 @@ function sendDiscoveryFrame() {
   if (deviceDiscoveryPeriods < 240) {
     deviceDiscoveryPeriods++;
     setTimeout(sendDiscoveryFrame, 250);
+  } else {
+    exports.emit('deviceDiscoveryFinished');
   }
 }
 
@@ -146,7 +153,7 @@ function handleMACFrame(frame) {
     break;
   case MACCommand.DISCOVER:
     var protocolInfo = new OSNPProtocolInfo(frame.sourceAddress);
-    discoveryCallback(protocolInfo.toID(), protocolInfo);
+    exports.emit('deviceDiscovered', protocolInfo.toID(), protocolInfo);
     break;
   }
 }

@@ -12,6 +12,7 @@ var deviceManager = angular.module('deviceManager', [
  
 deviceManager.controller('DeviceController', function ($scope, deviceSocket) {  
   $scope.discoverDevices = function() {
+    $scope.unpairedDevices = [];
     deviceSocket.emit('discoverDevices');
   }
   

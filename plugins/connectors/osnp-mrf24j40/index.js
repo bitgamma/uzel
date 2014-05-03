@@ -24,7 +24,8 @@ var unpairingCallback;
 
 var addressTable;
 
-util.inherits(exports, events.EventEmitter);
+module.exports = new events.EventEmitter();
+exports = module.exports;
 
 exports.start = function() {
   if (process.platform == 'linux') {

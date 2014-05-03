@@ -106,7 +106,7 @@ function addToQueue(frame, device, cb, address) {
   var queue = getQueue(address, device);
   queue.device = device;
   queue.queue(new QueuedFrame(frame, cb)); 
-  tryDequeue(); 
+  tryDequeue(queue); 
 }
 
 function transmitDiscoveryRequest() {

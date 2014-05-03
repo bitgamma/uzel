@@ -8,24 +8,28 @@ var FIFO = mrf24j40.FIFO;
 
 var osnp = require('node-osnp');
 var OSNPAddressTable = osnp.OSNPAddressTable;
+var OSNPCommandQueue = osnp.OSNPCommandQueue;
 var FrameType = osnp.FrameType;
 var FrameVersion = osnp.FrameVersion;
 var AddressingMode = osnp.AddressingMode;
 var MACCommand = osnp.MACCommand;
 
 var radio;
-var frameQueue = [];
-var cbCache = {};
-var transmissionPending = null;
-
-var deviceDiscoveryPeriods;
-var pairingCallback;
-var unpairingCallback;
+var txQueue;
+var txFrame;
 
 var addressTable;
+var deviceQueues;
+
+var deviceDiscoveryPeriods;
 
 module.exports = new events.EventEmitter();
 exports = module.exports;
+
+function QueuedFrame(frame, callback) {
+  this.frame = frame;
+  this.callback = callback;
+}
 
 exports.start = function() {
   if (process.platform == 'linux') {
@@ -34,6 +38,9 @@ exports.start = function() {
   
   // This must be persistent
   addressTable = new OSNPAddressTable();
+  deviceQueues = {};
+  txQueue = [];
+  txFrame = null;
 
   osnp.setPANID(new Buffer([0xfe, 0xca]));
   osnp.setShortAddress(new Buffer([0x00, 0x00]));      
@@ -49,93 +56,76 @@ exports.start = function() {
   }
 }
 
+exports.discoverDevices = function() {
+  deviceDiscoveryPeriods = 0;
+  transmitDiscoveryRequest();
+}
+
 exports.pair = function(device, pairingData, cb) {
-  pairingCallback = cb.bind(null, device);
-  var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, true, false);
-  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.SHORT_ADDRESS);
-  
-  var frame = osnp.createFrame(frameControlLow, frameControlHigh);
-  frame.destinationPAN = new Buffer([0x00, 0x00]);   
-  frame.destinationAddress = device.protocolInfo.eui;
-  
   device.protocolInfo.shortAddress = new Buffer(2);
   device.protocolInfo.shortAddress.writeUInt16LE(addressTable.allocate(), 0);
-  
-  frame.payload = new Buffer([MACCommand.ASSOCIATION_REQUEST, device.protocolInfo.shortAddress[0], device.protocolInfo.shortAddress[1]]);
-  frameQueue.push(frame);
-  trySend();
+  var frame = osnp.createPairingCommand(device.protocolInfo.eui, device.protocolInfo.shortAddress);
+  addToQueue(frame, device, cb, device.protocolInfo.shortAddress);
 }
 
 exports.unpair = function(device, cb) {
-  unpairingCallback = cb.bind(null, device);
-  var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, true, false);
-  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
-  
-  var frame = osnp.createFrame(frameControlLow, frameControlHigh);
-  frame.destinationPAN = osnp.getPANID();
-  frame.destinationAddress = device.protocolInfo.shortAddress;
-  addressTable.free(device.protocolInfo.shortAddress);
-  frame.payload = new Buffer([MACCommand.DISASSOCIATED]);
-  frameQueue.push(frame);
-  trySend();
-}
-
-exports.discoverDevices = function() {
-  deviceDiscoveryPeriods = 0;
-  
-  sendDiscoveryFrame();
+  var frame = osnp.createUnpairingCommand(device.protocolInfo.shortAddress);
+  addToQueue(frame, device, cb);
 }
 
 exports.send = function(device, data, cb) {  
-  var frameControlLow = osnp.makeFrameControlLow(FrameType.DATA, false, false, true, false);
-  var frameControlHigh;
-  
-  if (device.paired) {
-    frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.NOT_PRESENT);
-  } else {
-    frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.EUI, FrameVersion.V2003, AddressingMode.SHORT_ADDRESS);    
-  }
-  
-  var frame = osnp.createFrame(frameControlLow, frameControlHigh);
-  
-  if (device.paired) {
-    frame.destinationPAN = osnp.getPANID();
-    frame.destinationAddress = device.protocolInfo.shortAddress;    
-  } else {
-    frame.destinationPAN = new Buffer([0x00, 0x00]);   
-    frame.destinationAddress = device.protocolInfo.eui;    
-  }
-  
-  frame.payload = data;
-  
-  frameQueue.push(frame);
-  cbCache[frame.destinationAddress.toString('hex')] = cb;
-  trySend();
+  var frame = osnp.createCommandPacket(device.protocolInfo.eui, device.protocolInfo.shortAddress, device.paired);
+  addToQueue(frame, device, cb);
 }
 
-function sendDiscoveryFrame() {
-  var frameControlLow = osnp.makeFrameControlLow(FrameType.MAC_CMD, false, false, false, false);
-  var frameControlHigh = osnp.makeFrameControlHigh(AddressingMode.SHORT_ADDRESS, FrameVersion.V2003, AddressingMode.SHORT_ADDRESS);
+function getQueue(address) {
+  var queue = deviceQueues[address.toString('hex')];
   
-  var frame = osnp.createFrame(frameControlLow, frameControlHigh);
-  frame.destinationPAN = new Buffer([0x00, 0x00]);
-  frame.destinationAddress = new Buffer([0xff, 0xff]);
-  frame.payload = new Buffer([MACCommand.DISCOVER]);
-  frameQueue.push(frame);
-  trySend();
+  if (!queue) {
+    queue = new OSNPCommandQueue();
+    deviceQueues[address.toString('hex')] = queue;
+  }
+  
+  return queue;
+}
+
+function tryDequeue(queue) {
+  var cmd = queue.dequeue();
+  
+  if (cmd) {
+    txQueue.push(cmd.frame);
+    tryTransmit();
+  }
+}
+
+function addToQueue(frame, device, cb, address) {
+  if (!address) {
+    address = frame.destinationAddress;
+  }
+  
+  var queue = getQueue(address, device);
+  queue.device = device;
+  queue.queue(new QueuedFrame(frame, cb)); 
+  tryDequeue(); 
+}
+
+function transmitDiscoveryRequest() {
+  var frame = osnp.createDiscoveryRequest();
+  txQueue.push(frame);
+  tryTransmit();
   
   if (deviceDiscoveryPeriods < 240) {
     deviceDiscoveryPeriods++;
-    setTimeout(sendDiscoveryFrame, 250);
+    setTimeout(transmitDiscoveryRequest, 250);
   } else {
     exports.emit('deviceDiscoveryFinished');
   }
 }
 
-function trySend() {
-  if (!transmissionPending && (frameQueue.length > 0)) {
-    var frame = frameQueue.shift();
-    transmissionPending = frame;
+function tryTransmit() {
+  if (!txFrame && (txQueue.length > 0)) {
+    var frame = txQueue.shift();
+    txFrame = frame;
     var frameLength = frame.getEncodedLength();
     var buf = new Buffer(frameLength + 2);
     buf[0] = frameLength - frame.payload.length;
@@ -148,7 +138,12 @@ function trySend() {
 function handleMACFrame(frame) {  
   switch (frame.payload[0]) {
   case MACCommand.ASSOCIATION_RESPONSE:
-    pairingCallback();
+    //TODO: handle error
+    var queue = getQueue(frame.sourceAddress);
+    delete deviceQueues[device.protocolInfo.eui];
+    var cmd = queue.deviceResponded();
+    cmd.callback(cmd.device);
+    tryDequeue(queue);
     break;
   case MACCommand.DATA_REQUEST:
     break;
@@ -160,13 +155,17 @@ function handleMACFrame(frame) {
 }
 
 function handleDataFrame(frame) {
-  var cb = cbCache[frame.sourceAddress.toString('hex')];
+  var queue = getQueue(frame.sourceAddress);  
   
-  //TODO: what to do with data generated by the device (notification)
-  if (cb) {
-    delete cbCache[frame.sourceAddress.toString('hex')];
-    cb(frame.payload);
-  }  
+  //TODO: what if the queue has not been created yet? need to sort this at initialization, I think
+  if (frame.payload[0] == 0xE2) {
+    exports.emit('notificationReceived', queue.device, frame.payload);
+    return;
+  }
+
+  var cmd = queue.deviceResponded();
+  cmd.callback(frame.payload);
+  tryDequeue(); 
 }
 
 function handleReceived(rawFrame, lqi, rssi) {
@@ -184,16 +183,21 @@ function handleReceived(rawFrame, lqi, rssi) {
 
 function handleTransmitted(txErr, ccaErr) {
   if(ccaErr) {
-    frameQueue.push(transmissionPending);
+    txQueue.push(txFrame);
   } else if (txErr) {
-    delete cbCache[transmissionPending.destinationAddress.toString('hex')];    
-  } else if (transmissionPending.payload[0] == MACCommand.DISASSOCIATED) {
-    unpairingCallback();
-    unpairingCallback = null;
+    var queue = getQueue(txFrame.destinationAddress);
+    var sentCmd = queue.deviceResponded();
+    //TODO: handle error by invoking callback with a proper error code
+  } else if (txFrame.payload[0] == MACCommand.DISASSOCIATED) {
+    var queue = getQueue(txFrame.destinationAddress);
+    addressTable.free(queue.device.protocolInfo.shortAddress);
+    var cmd = queue.deviceResponded();
+    cmd.callback(device);
+    tryDequeue(queue); 
   }
   
-  transmissionPending = null;
-  trySend();
+  txFrame = null;
+  tryTransmit();
 }
 
 function OSNPProtocolInfo(eui) {

@@ -142,6 +142,7 @@ function handleMACFrame(frame) {
     var queue = getQueue(frame.sourceAddress);
     delete deviceQueues[queue.device.protocolInfo.eui];
     var cmd = queue.deviceResponded();
+    queue.device.protocolInfo.capabilities = frame.payload[1];
     cmd.callback(queue.device);
     tryDequeue(queue);
     break;

@@ -85,7 +85,7 @@ function tryUnsetFramePending() {
   for(var queueName in deviceQueues) {
     var queue = deviceQueues[queueName];
     
-    if (queue.device.protocolInfo.isPollDriven() && !queue.isEmpty) {
+    if (queue.device.protocolInfo.isPollDriven() && !queue.isEmpty()) {
       empty = false;
       break;
     }
@@ -205,7 +205,11 @@ function handleDataFrame(frame) {
   }
 
   var cmd = queue.deviceResponded();
-  cmd.callback(frame.payload);
+  
+  if (cmd) {
+    cmd.callback(frame.payload);    
+  }
+  
   tryDequeue(queue); 
 }
 

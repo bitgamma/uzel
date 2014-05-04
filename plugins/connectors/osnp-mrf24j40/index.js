@@ -110,7 +110,7 @@ function getQueue(address) {
 function tryDequeue(queue) {
   var cmd;
   
-  if (!device.protocolInfo.isPollDriven()) {
+  if (!queue.device.protocolInfo.isPollDriven()) {
     cmd = queue.dequeue();
   } else if (queue.active) {
     cmd = queue.dequeue();

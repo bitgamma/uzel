@@ -37,9 +37,9 @@ function index(req, res) {
 }
 
 function getDevicesByType(req, res) {
-  res.json(devMgr.getDevicesByType(req.query.types).filter(function(element) { 
-    return monitoredDevices.indexOf(element) == -1;
-  }).map(deviceDescriptor));
+  devMgr.getDevicesByType(req.query.types, function(devices) {
+    res.json(devices.filter(function(element) { return monitoredDevices.indexOf(element) == -1; }).map(deviceDescriptor));
+  });  
 }
 
 function getSupportedTypes(req, res) {
@@ -54,13 +54,11 @@ function handleDashboardSocketConnection(socket) {
 }
 
 function addMonitoredDevice(deviceID) {
-  var device = devMgr.getDeviceByID(deviceID);
-  
-  if (device) {
+  devMgr.getDeviceByID(deviceID, function(device) {
     monitoredDevices.push(device);
     getUpdatedDeviceData(device);
-    appMgr.io.of('/dashboard').emit('deviceAdded', deviceDescriptor(device));
-  }
+    appMgr.io.of('/dashboard').emit('deviceAdded', deviceDescriptor(device));    
+  });
 }
 
 function removeDevice(deviceID) {
@@ -72,11 +70,9 @@ function removeDevice(deviceID) {
 }
 
 function updateDevice(deviceID) {
-  var device = devMgr.getDeviceByID(deviceID);
-  
-  if (device) {
-    getUpdatedDeviceData(device);
-  }
+  devMgr.getDeviceByID(deviceID, function(device) {
+    getUpdatedDeviceData(device);    
+  });
 }
 
 function getUpdatedDeviceData(device) {

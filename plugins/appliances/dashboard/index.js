@@ -54,7 +54,7 @@ function handleDashboardSocketConnection(socket) {
 }
 
 function addMonitoredDevice(deviceID) {
-  var device = devMgr.getDeviceByFullID(deviceID);
+  var device = devMgr.getDeviceByID(deviceID);
   
   if (device) {
     monitoredDevices.push(device);
@@ -65,14 +65,14 @@ function addMonitoredDevice(deviceID) {
 
 function removeDevice(deviceID) {
   monitoredDevices = monitoredDevices.filter(function(dev) { 
-    return dev.getFullID() != deviceID;
+    return dev.id != deviceID;
   });
   
   appMgr.io.of('/dashboard').emit('deviceRemoved', deviceID);  
 }
 
 function updateDevice(deviceID) {
-  var device = devMgr.getDeviceByFullID(deviceID);
+  var device = devMgr.getDeviceByID(deviceID);
   
   if (device) {
     getUpdatedDeviceData(device);
@@ -87,7 +87,7 @@ function getUpdatedDeviceData(device) {
 }
 
 function processFormattedResponse(command, formattedResponse) {
-  appMgr.io.of('/dashboard').emit('deviceUpdated', command.device.getFullID(), formattedResponse);  
+  appMgr.io.of('/dashboard').emit('deviceUpdated', command.device.id, formattedResponse);  
 }
 
 function handleTemperatureDataReceived(cb, command, response) {
@@ -100,5 +100,5 @@ function handleTemperatureDataReceived(cb, command, response) {
 }
 
 function deviceDescriptor(device) {
-  return { 'id': device.getFullID(), 'name': device.deviceInfo.name, 'value': '...' };
+  return { 'id': device.id, 'name': device.deviceInfo.name, 'value': '...' };
 }

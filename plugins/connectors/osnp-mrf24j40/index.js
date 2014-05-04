@@ -85,7 +85,7 @@ function tryUnsetFramePending() {
   for(var queueName in deviceQueues) {
     var queue = deviceQueues[queueName];
     
-    if (queue.device.protocolInfo.isPollDriven() && !queue.isEmpty()) {
+    if (isPollDriven(queue.device) && !queue.isEmpty()) {
       empty = false;
       break;
     }
@@ -110,7 +110,7 @@ function getQueue(address) {
 function tryDequeue(queue) {
   var cmd;
   
-  if (!queue.device.protocolInfo.isPollDriven()) {
+  if (!isPollDriven(queue.device)) {
     cmd = queue.dequeue();
   } else if (queue.active) {
     cmd = queue.dequeue();
@@ -136,7 +136,7 @@ function addToQueue(frame, device, cb, address) {
     address = frame.destinationAddress;
   }
   
-  if (device.protocolInfo.isPollDriven()) {
+  if (isPollDriven(device)) {
     radio.setDataRequestFramePending(true);
   }
   
@@ -190,7 +190,7 @@ function handleMACFrame(frame) {
     break;
   case MACCommand.DISCOVER:
     var protocolInfo = new OSNPProtocolInfo(frame.sourceAddress);
-    exports.emit('deviceDiscovered', protocolInfo.toID(), protocolInfo);
+    exports.emit('deviceDiscovered', protocolInfo);
     break;
   }
 }
@@ -245,17 +245,13 @@ function handleTransmitted(txErr, ccaErr) {
   tryTransmit();
 }
 
+function isPollDriven(device) {
+  return (device.protocolInfo.capabilities !== null && ((device.protocolInfo.capabilities & 0x01) == RXMode.POLL_DRIVEN));
+} 
+
 function OSNPProtocolInfo(eui) {
   this.eui = eui;
   this.shortAddress = null;
   this.capabilities = null;
+  this.id = this.eui.toString('hex');
 }
-
-OSNPProtocolInfo.prototype.toID = function() {
-  return this.eui.toString('hex');
-}
-
-OSNPProtocolInfo.prototype.isPollDriven = function() {
-  return (this.capabilities !== null && ((this.capabilities & 0x01) == RXMode.POLL_DRIVEN));
-}
-

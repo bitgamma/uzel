@@ -8,9 +8,9 @@ describe('DeviceManager', function() {
   chai.should();
 
   var mock_connector = require('./mock_connector');  
-  var mockDevice = new device_manager.Device('mock', 'mock');
-  var subMockDevice = new device_manager.Device('mock', 'mock', null, mockDevice, 0);
-  var secondMockDevice = new device_manager.Device('mock2', 'mock');
+  var mockDevice = new device_manager.Device('mock', { 'id': 'mock' });
+  var subMockDevice = new device_manager.Device('mock', { 'id': 'mock' }, mockDevice, 0);
+  var secondMockDevice = new device_manager.Device('mock', { 'id': 'mock2' });
   
   describe('#DeviceManager', function() {
     it('should return an instance of DeviceManager', function() {

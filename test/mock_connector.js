@@ -41,7 +41,7 @@ exports.unpair = function(device, cb) {
 exports.discoverDevices = function(cb) {
   for(var i = 0, len = availableDevices.length; i < len; i++) {
     var dev = availableDevices[i];
-    cb(dev.id, dev);
+    cb(dev);
   }
 }
 

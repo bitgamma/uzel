@@ -32,16 +32,22 @@ function QueuedFrame(frame, callback) {
   this.callback = callback;
 }
 
-exports.start = function() {
-  if (process.platform == 'linux') {
-    radio = new MRF24J40('raspi');    
+exports.start = function(pairedDevices) {
+  for(var i = 0, len = pairedDevices.length; i < len; i++) {
+    queue = new OSNPCommandQueue();
+    queue.device = pairedDevices[i];
+    deviceQueues[queue.device.protocolInfo.shortAddress.toString('hex')] = queue;
   }
   
-  // This must be persistent
+  // This must be reinitialized
   addressTable = new OSNPAddressTable();
   deviceQueues = {};
   txQueue = [];
   txFrame = null;
+  
+  if (process.platform == 'linux') {
+    radio = new MRF24J40('raspi');    
+  }
 
   osnp.setPANID(new Buffer([0xfe, 0xca]));
   osnp.setShortAddress(new Buffer([0x00, 0x00]));      

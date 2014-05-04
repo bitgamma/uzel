@@ -9,7 +9,7 @@ describe('DeviceManager', function() {
 
   var mock_connector = require('./mock_connector');  
   var mockDevice = new device_manager.Device('mock', { 'id': 'mock' });
-  var subMockDevice = new device_manager.Device('mock', { 'id': 'mock' }, mockDevice, 0);
+  var subMockDevice = new device_manager.Device('mock', { 'id': 'mock' }, 0);
   var secondMockDevice = new device_manager.Device('mock', { 'id': 'mock2' });
   
   describe('#DeviceManager', function() {
@@ -164,8 +164,8 @@ describe('DeviceManager', function() {
       var cb = function() {};
       var commands = [ dm.createGetDeviceInfoCommand(mockDevice, cb), dm.createGetDeviceInfoCommand(subMockDevice, cb), dm.createGetDeviceInfoCommand(secondMockDevice, cb) ];
       var sortedCommands = device_manager.groupCommandsByPhysicalDevice(commands);
-      sortedCommands.get(mockDevice).length.should.equal(2);
-      sortedCommands.get(secondMockDevice).length.should.equal(1);
+      sortedCommands[mockDevice.physicalID].length.should.equal(2);
+      sortedCommands[secondMockDevice.physicalID].length.should.equal(1);
     });
   });
 });

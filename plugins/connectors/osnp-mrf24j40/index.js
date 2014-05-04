@@ -265,7 +265,8 @@ function isPollDriven(device) {
 } 
 
 function OSNPProtocolInfo(eui) {
-  this.eui = eui;
+  this.eui = new Buffer(eui.length);
+  eui.copy(this.eui);
   this.shortAddress = null;
   this.capabilities = null;
   this.id = this.eui.toString('hex');

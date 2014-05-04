@@ -146,7 +146,7 @@ function addToQueue(frame, device, cb, address) {
     radio.setDataRequestFramePending(true);
   }
   
-  var queue = getQueue(address, device);
+  var queue = getQueue(address);
   queue.device = device;
   queue.queue(new QueuedFrame(frame, cb)); 
   tryDequeue(queue); 

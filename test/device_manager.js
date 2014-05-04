@@ -12,16 +12,22 @@ describe('DeviceManager', function() {
   var subMockDevice = new device_manager.Device('mock', { 'id': 'mock' }, 0);
   var secondMockDevice = new device_manager.Device('mock', { 'id': 'mock2' });
   
+  var config = {
+    connectorDirectories: [],
+    applianceDirectories: [],
+    persistencyPath: __dirname
+  };
+  
   describe('#DeviceManager', function() {
     it('should return an instance of DeviceManager', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       dm.should.be.instanceof(EventEmitter);
     });
   });
   
   describe('#createGetDeviceInfoCommand', function() {    
     it('should return a DeviceCommand for GET DEVICE INFO', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var command = dm.createGetDeviceInfoCommand(mockDevice, cb);
       command.should.be.instanceof(device_manager.DeviceCommand);
@@ -34,7 +40,7 @@ describe('DeviceManager', function() {
 
   describe('#createConfigureCommand', function() {
     it('should return a DeviceCommand for CONFIGURE', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var param = new TLV(0x82, new Buffer([0xBA, 0xBA]));
       var cb = function() {};
       var command = dm.createConfigureCommand(mockDevice, [ param ], cb);
@@ -50,7 +56,7 @@ describe('DeviceManager', function() {
   
   describe('#createGetDataCommand', function() {
     it('should return a DeviceCommand for GET DATA with parameters', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var param = new TLV(0x82, new Buffer([0xBA, 0xBA]));
       var cb = function() {};
       var command = dm.createGetDataCommand(mockDevice, [ param ], cb);
@@ -64,7 +70,7 @@ describe('DeviceManager', function() {
     });
     
     it('should return a DeviceCommand for GET DATA without parameters', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var command = dm.createGetDataCommand(mockDevice, cb);
       command.should.be.instanceof(device_manager.DeviceCommand);
@@ -77,7 +83,7 @@ describe('DeviceManager', function() {
   
   describe('#createPerformCommand', function() {
     it('should return a DeviceCommand for PERFORM with parameters', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var param = new TLV(0x82, new Buffer([0xBA, 0xBA]));
       var cb = function() {};
       var command = dm.createPerformCommand(mockDevice, 0x90, [ param ], cb);
@@ -93,7 +99,7 @@ describe('DeviceManager', function() {
     });
     
     it('should return a DeviceCommand for PERFORM without parameters', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var command = dm.createPerformCommand(mockDevice, 0x90, cb);
       command.should.be.instanceof(device_manager.DeviceCommand);
@@ -108,7 +114,7 @@ describe('DeviceManager', function() {
   
   describe('#createSubscribeCommand', function() {    
     it('should return a DeviceCommand for SUBSCRIBE', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var command = dm.createSubscribeCommand(mockDevice, [0xA2, 0xA1, 0xA4], cb);
       command.should.be.instanceof(device_manager.DeviceCommand);
@@ -123,7 +129,7 @@ describe('DeviceManager', function() {
   
   describe('#createUnsubscribeCommand', function() {    
     it('should return a DeviceCommand for UNSUBSCRIBE', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var command = dm.createUnsubscribeCommand(mockDevice, [0xA2, 0xFF01, 0xA1, 0xA4], cb);
       command.should.be.instanceof(device_manager.DeviceCommand);
@@ -138,7 +144,7 @@ describe('DeviceManager', function() {
   
   describe('#createPacket', function() {    
     it('should create a TLV packet with all given commands', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var commands = [ dm.createGetDeviceInfoCommand(mockDevice, cb), dm.createGetDeviceInfoCommand(subMockDevice, cb), dm.createGetDataCommand(subMockDevice, [ new TLV(0x82, new Buffer([0xBA, 0xBA])) ], cb) ];
       var tlvPacket = dm.createPacket(commands);
@@ -160,7 +166,7 @@ describe('DeviceManager', function() {
   
   describe('#groupCommandsByPhysicalDevice', function() {    
     it('should group commands by the physical device to which they should be sent', function() {
-			var dm = new DeviceManager({});
+			var dm = new DeviceManager(config);
       var cb = function() {};
       var commands = [ dm.createGetDeviceInfoCommand(mockDevice, cb), dm.createGetDeviceInfoCommand(subMockDevice, cb), dm.createGetDeviceInfoCommand(secondMockDevice, cb) ];
       var sortedCommands = device_manager.groupCommandsByPhysicalDevice(commands);

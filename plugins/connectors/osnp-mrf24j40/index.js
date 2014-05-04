@@ -33,17 +33,17 @@ function QueuedFrame(frame, callback) {
 }
 
 exports.start = function(pairedDevices) {
-  for(var i = 0, len = pairedDevices.length; i < len; i++) {
-    queue = new OSNPCommandQueue();
-    queue.device = pairedDevices[i];
-    deviceQueues[queue.device.protocolInfo.shortAddress.toString('hex')] = queue;
-  }
-  
   // This must be reinitialized
   addressTable = new OSNPAddressTable();
   deviceQueues = {};
   txQueue = [];
   txFrame = null;
+  
+  for(var i = 0, len = pairedDevices.length; i < len; i++) {
+    queue = new OSNPCommandQueue();
+    queue.device = pairedDevices[i];
+    deviceQueues[queue.device.protocolInfo.shortAddress.toString('hex')] = queue;
+  }
   
   if (process.platform == 'linux') {
     radio = new MRF24J40('raspi');    

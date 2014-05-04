@@ -1,6 +1,6 @@
 {
   "name": "uzel",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/briksoftware/uzel",
   "description": "A node.js based application server for IOT applications and home/industrial automation",
   "license": "MIT",

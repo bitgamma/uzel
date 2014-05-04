@@ -183,16 +183,22 @@ function handleMACFrame(frame) {
   case MACCommand.ASSOCIATION_RESPONSE:
     //TODO: handle error
     var queue = getQueue(frame.sourceAddress);
-    delete deviceQueues[queue.device.protocolInfo.eui];
-    var cmd = queue.deviceResponded();
-    queue.device.protocolInfo.capabilities = frame.payload[1];
-    cmd.callback(queue.device);
-    tryDequeue(queue);
+    
+    if (queue.device) {
+      delete deviceQueues[queue.device.protocolInfo.eui];
+      var cmd = queue.deviceResponded();
+      queue.device.protocolInfo.capabilities = frame.payload[1];
+      cmd.callback(queue.device);
+      tryDequeue(queue);      
+    }
     break;
   case MACCommand.DATA_REQUEST:
     var queue = getQueue(frame.sourceAddress);
-    queue.active = true;
-    tryDequeue(queue);
+    
+    if (queue.device) {
+      queue.active = true;
+      tryDequeue(queue);      
+    }
     break;
   case MACCommand.DISCOVER:
     var protocolInfo = new OSNPProtocolInfo(frame.sourceAddress);
@@ -204,7 +210,10 @@ function handleMACFrame(frame) {
 function handleDataFrame(frame) {
   var queue = getQueue(frame.sourceAddress);  
   
-  //TODO: what if the queue has not been created yet? need to sort this at initialization, I think
+  if (!queue.device) {
+    return;
+  }
+  
   if (frame.payload[0] == 0xE2) {
     exports.emit('notificationReceived', queue.device, frame.payload);
     return;

@@ -13,6 +13,7 @@ var FrameType = osnp.FrameType;
 var FrameVersion = osnp.FrameVersion;
 var AddressingMode = osnp.AddressingMode;
 var MACCommand = osnp.MACCommand;
+var RXMode = osnp.RXMode;
 
 var radio;
 var txQueue;
@@ -78,6 +79,23 @@ exports.send = function(device, data, cb) {
   addToQueue(frame, device, cb);
 }
 
+function tryUnsetFramePending() {
+  var empty = true;
+  
+  for(var queueName in deviceQueues) {
+    var queue = deviceQueues[queueName];
+    
+    if (queue.device.protocolInfo.isPollDriven() && !queue.isEmpty) {
+      empty = false;
+      break;
+    }
+  }
+  
+  if (empty) {
+    radio.setDataRequestFramePending(false);
+  }
+}
+
 function getQueue(address) {
   var queue = deviceQueues[address.toString('hex')];
   
@@ -90,17 +108,36 @@ function getQueue(address) {
 }
 
 function tryDequeue(queue) {
-  var cmd = queue.dequeue();
+  var cmd;
+  
+  if (!device.protocolInfo.isPollDriven()) {
+    cmd = queue.dequeue();
+  } else if (queue.active) {
+    cmd = queue.dequeue();
+
+    if (queue.isEmpty()) {
+      queue.active = false;
+    } else
+      //add the frame pending bit
+      cmd.frame.frameControlLow = cmd.frame.frameControlLow | 0x10;
+    }
+  }
   
   if (cmd) {
     txQueue.push(cmd.frame);
     tryTransmit();
   }
+  
+  tryUnsetFramePending();
 }
 
 function addToQueue(frame, device, cb, address) {
   if (!address) {
     address = frame.destinationAddress;
+  }
+  
+  if (device.protocolInfo.isPollDriven()) {
+    radio.setDataRequestFramePending(true);
   }
   
   var queue = getQueue(address, device);
@@ -147,6 +184,9 @@ function handleMACFrame(frame) {
     tryDequeue(queue);
     break;
   case MACCommand.DATA_REQUEST:
+    var queue = getQueue(frame.sourceAddress);
+    queue.active = true;
+    tryDequeue(queue);
     break;
   case MACCommand.DISCOVER:
     var protocolInfo = new OSNPProtocolInfo(frame.sourceAddress);
@@ -209,5 +249,9 @@ function OSNPProtocolInfo(eui) {
 
 OSNPProtocolInfo.prototype.toID = function() {
   return this.eui.toString('hex');
+}
+
+OSNPProtocolInfo.prototype.isPollDriven = function() {
+  return (this.capabilities !== null && ((this.capabilities & 0x01) == RXMode.POLL_DRIVEN));
 }
 

@@ -37,7 +37,7 @@ function index(req, res) {
 }
 
 function getDevicesByType(req, res) {
-  devMgr.getDevicesByType(req.query.types, function(devices) {
+  devMgr.getDevicesByType(req.query.types.map(function(a) { return parseInt(a); }), function(devices) {
     res.json(devices.filter(function(element) { return monitoredDevices.indexOf(element) == -1; }).map(deviceDescriptor));
   });  
 }

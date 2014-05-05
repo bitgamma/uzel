@@ -1,5 +1,6 @@
 require('es6-shim');
 
+var util = require('util');
 var express = require('express');
 var app;
 var appMgr;
@@ -37,7 +38,15 @@ function index(req, res) {
 }
 
 function getDevicesByType(req, res) {
-  devMgr.getDevicesByType(req.query.types.map(function(a) { return parseInt(a); }), function(devices) {
+  var types = req.query.types;
+  
+  if (util.isArray(types)) {
+    types = types.map(function(a) { return parseInt(a); });
+  } else {
+    types = [ parseInt(types) ];
+  }
+  
+  devMgr.getDevicesByType(types, function(devices) {
     res.json(devices.filter(function(element) { return monitoredDevices.indexOf(element) == -1; }).map(deviceDescriptor));
   });  
 }

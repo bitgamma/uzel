@@ -78,7 +78,10 @@ function getSupportedTypes(req, res) {
 }
 
 function handleDashboardSocketConnection(socket) {
-  socket.emit('init', monitoredDevices.map(deviceDescriptor));
+  monitoredDevices.find({}, function(err, devices) {
+    socket.emit('init', devices);
+  });
+  
   socket.on('addMonitoredDevice', addMonitoredDevice);
   socket.on('removeDevice', removeDevice);
   socket.on('updateDevice', updateDevice);

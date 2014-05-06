@@ -48,7 +48,7 @@ dashboard.controller('DashboardController', function ($scope, $http, dashboardSo
   dashboardSocket.on('init', function(monitoredDevices) {
     $scope.monitoredDevices = monitoredDevices;
     
-    for(var i = 0, len = $scope.monitoredDevices.length; i++) {
+    for(var i = 0, len = $scope.monitoredDevices.length; i < len; i++) {
       $scope.updateDevice($scope.monitoredDevices[i]);
     }
   });

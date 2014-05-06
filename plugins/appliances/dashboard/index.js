@@ -1,18 +1,25 @@
 require('es6-shim');
 
+var path = require('path');
 var util = require('util');
 var express = require('express');
+var Datastore = require('nedb');
+
 var app;
 var appMgr;
 var devMgr;
 
-var monitoredDevices = [];
+var monitoredDevices;
 var supportedTypes;
 
 exports.createAppliance = function(applianceManager) {
   if (!app) {
     appMgr = applianceManager;
     devMgr = appMgr.deviceManager;
+    
+    monitoredDevices = new Datastore({ filename: path.join(appMgr.configuration.persistencyPath, 'dashboard.nedb'), autoload: true });
+    
+    devMgr.on('deviceUnpaired', function(device) { removeDevice(device.id) });
     
     app = express();
     app.set('views', __dirname + '/views');
@@ -47,7 +54,22 @@ function getDevicesByType(req, res) {
   }
   
   devMgr.getDevicesByType(types, function(devices) {
-    res.json(devices.filter(function(element) { return monitoredDevices.indexOf(element) == -1; }).map(deviceDescriptor));
+    var foundDevices;
+    var processed = 0;
+    
+    for(var i = 0, len = devices.length; i < len; i++) {
+      monitoredDevices.findOne({ id: devices[i].id }, function(dev) {
+        if (!dev) {
+          foundDevices.push(deviceDescriptor(devices[i]));
+        }
+        
+        processed++;
+        
+        if (processed == len) {
+          res.json(foundDevices);
+        }
+      });
+    }    
   });  
 }
 
@@ -64,18 +86,19 @@ function handleDashboardSocketConnection(socket) {
 
 function addMonitoredDevice(deviceID) {
   devMgr.getDeviceByID(deviceID, function(device) {
-    monitoredDevices.push(device);
-    getUpdatedDeviceData(device);
-    appMgr.io.of('/dashboard').emit('deviceAdded', deviceDescriptor(device));    
+    monitoredDevices.insert(deviceDescriptor(device), function(insertErr, insertedDevice) {
+      getUpdatedDeviceData(device);
+      appMgr.io.of('/dashboard').emit('deviceAdded', insertedDevice);   
+    });
   });
 }
 
 function removeDevice(deviceID) {
-  monitoredDevices = monitoredDevices.filter(function(dev) { 
-    return dev.id != deviceID;
+  monitoredDevices.remove({ id: deviceID }, {}, function (err, numRemoved) {
+    if (numRemoved > 0) {
+      appMgr.io.of('/dashboard').emit('deviceRemoved', deviceID);
+    }
   });
-  
-  appMgr.io.of('/dashboard').emit('deviceRemoved', deviceID);  
 }
 
 function updateDevice(deviceID) {

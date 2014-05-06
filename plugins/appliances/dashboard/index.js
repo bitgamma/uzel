@@ -54,13 +54,15 @@ function getDevicesByType(req, res) {
   }
   
   devMgr.getDevicesByType(types, function(devices) {
-    var foundDevices;
+    var foundDevices = [];
     var processed = 0;
     
     for(var i = 0, len = devices.length; i < len; i++) {
-      monitoredDevices.findOne({ id: devices[i].id }, function(dev) {
+      var device = devices[i];
+      
+      monitoredDevices.findOne({ id: device.id }, function(dev) {        
         if (!dev) {
-          foundDevices.push(deviceDescriptor(devices[i]));
+          foundDevices.push(deviceDescriptor(device));
         }
         
         processed++;

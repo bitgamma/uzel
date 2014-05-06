@@ -190,9 +190,13 @@ function handleMACFrame(frame) {
     if (queue.device) {
       delete deviceQueues[queue.device.protocolInfo.eui];
       var cmd = queue.deviceResponded();
-      queue.device.protocolInfo.capabilities = frame.payload[1];
-      cmd.callback(queue.device);
-      tryDequeue(queue);      
+      
+      if (cmd) {
+        queue.device.protocolInfo.capabilities = frame.payload[1];
+        cmd.callback(queue.device);
+      }
+
+      tryDequeue(queue);
     }
     break;
   case MACCommand.DATA_REQUEST:

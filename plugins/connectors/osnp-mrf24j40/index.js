@@ -124,7 +124,7 @@ function tryDequeue(queue) {
   } else if (queue.active) {
     cmd = queue.dequeue();
 
-    if (queue.isEmpty()) {
+    if (!cmd || queue.isEmpty()) {
       queue.active = false;
     } else {
       //add the frame pending bit

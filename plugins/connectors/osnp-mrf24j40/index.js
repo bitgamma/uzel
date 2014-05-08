@@ -27,10 +27,13 @@ var deviceDiscoveryPeriods;
 module.exports = new events.EventEmitter();
 exports = module.exports;
 
-function QueuedFrame(frame, callback) {
+function QueuedFrame(frame, timeout, callback) {
   this.frame = frame;
+  this.osnpTransmissionTimeout = timeout;
   this.callback = callback;
 }
+
+exports.allowMultipleCommandsInPacket = false;
 
 exports.start = function(pairedDevices) {
   deviceQueues = {};
@@ -75,17 +78,17 @@ exports.pair = function(device, pairingData, cb) {
   device.protocolInfo.shortAddress = new Buffer(2);
   device.protocolInfo.shortAddress.writeUInt16LE(addressTable.allocate(), 0);
   var frame = osnp.createPairingCommand(device.protocolInfo.eui, device.protocolInfo.shortAddress);
-  addToQueue(frame, device, cb, device.protocolInfo.shortAddress);
+  addToQueue(frame, device, 1000, cb, device.protocolInfo.shortAddress);
 }
 
 exports.unpair = function(device, cb) {
   var frame = osnp.createUnpairingCommand(device.protocolInfo.shortAddress);
-  addToQueue(frame, device, cb);
+  addToQueue(frame, device, 1000, cb);
 }
 
-exports.send = function(device, data, cb) {  
+exports.send = function(device, data, timeout, cb) {  
   var frame = osnp.createCommandPacket(data, device.protocolInfo.eui, device.protocolInfo.shortAddress, device.paired);
-  addToQueue(frame, device, cb);
+  addToQueue(frame, device, timeout, cb);
 }
 
 function tryUnsetFramePending() {
@@ -140,7 +143,7 @@ function tryDequeue(queue) {
   tryUnsetFramePending();
 }
 
-function addToQueue(frame, device, cb, address) {
+function addToQueue(frame, device, timeout, cb, address) {
   if (!address) {
     address = frame.destinationAddress;
   }
@@ -151,7 +154,7 @@ function addToQueue(frame, device, cb, address) {
   
   var queue = getQueue(address);
   queue.device = device;
-  queue.queue(new QueuedFrame(frame, cb)); 
+  queue.queue(new QueuedFrame(frame, timeout, cb)); 
   tryDequeue(queue); 
 }
 

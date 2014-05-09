@@ -64,7 +64,7 @@ exports.start = function(pairedDevices) {
   
   if (radio) {
     radio.on('frame', handleReceived);
-    radio.on('securedFrame', handleSecuredFrame);
+    radio.on('keyRequest', handleKeyRequest);
     radio.on('transmitted', handleTransmitted);
     radio.initialize();
     radio.setPANCoordinator();
@@ -259,9 +259,8 @@ function handleDataFrame(frame) {
   tryDequeue(queue); 
 }
 
-function handleSecuredFrame(rawFrame) {
-  var frame = osnp.parseFrame(rawFrame);
-  var queue = getQueue(frame.sourceAddress);  
+function handleKeyRequest(eui) {
+  var queue = getQueue(eui);  
   
   if (!queue.device) {
     radio.setCipher(false, true, 0x00, 0x00);

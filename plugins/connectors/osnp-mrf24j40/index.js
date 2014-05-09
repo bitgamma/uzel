@@ -1,5 +1,6 @@
 var events = require('events');
 var util = require('util');
+var crypto = require('crypto');
 
 var mrf24j40 = require('node-mrf24j40');
 var MRF24J40 = mrf24j40.MRF24J40;
@@ -10,9 +11,9 @@ var osnp = require('node-osnp');
 var OSNPAddressTable = osnp.OSNPAddressTable;
 var OSNPCommandQueue = osnp.OSNPCommandQueue;
 var FrameType = osnp.FrameType;
-var FrameVersion = osnp.FrameVersion;
 var AddressingMode = osnp.AddressingMode;
 var MACCommand = osnp.MACCommand;
+var SecurityLevel = osnp.SecurityLevel;
 var RXMode = osnp.RXMode;
 
 var radio;
@@ -46,24 +47,29 @@ exports.start = function(pairedDevices) {
     queue = new OSNPCommandQueue();
     queue.device = pairedDevices[i];
     deviceQueues[queue.device.protocolInfo.shortAddress.toString('hex')] = queue;
+    deviceQueues[queue.device.protocolInfo.eui.toString('hex')] = queue;
     initAddresses.push(queue.device.protocolInfo.shortAddress.readUInt16LE(0));
   }
 
   addressTable = new OSNPAddressTable(initAddresses);
   
   if (process.platform == 'linux') {
-    radio = new MRF24J40('raspi');    
+    radio = new MRF24J40('linux');    
   }
 
   osnp.setPANID(new Buffer([0xfe, 0xca]));
-  osnp.setShortAddress(new Buffer([0x00, 0x00]));      
+  osnp.setShortAddress(new Buffer([0x00, 0x00]));     
+  //TODO: make this configurable or read from somewhere 
+  osnp.setEUI(new Buffer([0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17]));      
   
   if (radio) {
     radio.on('frame', handleReceived);
+    radio.on('securedFrame', handleSecuredFrame);
     radio.on('transmitted', handleTransmitted);
     radio.initialize();
     radio.setPANCoordinator();
     radio.setPANID(osnp.getPANID());
+    radio.setEUI(osnp.getEUI());
     radio.setShortAddress(osnp.getShortAddress());      
     radio.setChannel(2);
   }
@@ -77,8 +83,14 @@ exports.discoverDevices = function() {
 exports.pair = function(device, pairingData, cb) {
   device.protocolInfo.shortAddress = new Buffer(2);
   device.protocolInfo.shortAddress.writeUInt16LE(addressTable.allocate(), 0);
-  var frame = osnp.createPairingCommand(device.protocolInfo.eui, device.protocolInfo.shortAddress);
-  addToQueue(frame, device, 1000, cb, device.protocolInfo.shortAddress);
+  device.protocolInfo.txKey = pairingData;
+  device.protocolInfo._txKey = crypto.randomBytes(16);
+  device.protocolInfo.rxKey = crypto.randomBytes(16);
+  queue.device.protocolInfo.securityLevel = SecurityLevel.AES_CCM_64;
+
+  var frame = osnp.createPairingCommand(device.protocolInfo.eui, device.protocolInfo.shortAddress, device.protocolInfo._txKey, device.protocolInfo.rxKey);
+  deviceQueues[device.protocolInfo.shortAddress.toString('hex')] = deviceQueues[device.protocolInfo.eui.toString('hex')];
+  addToQueue(frame, device, 1000, cb);
 }
 
 exports.unpair = function(device, cb) {
@@ -136,23 +148,19 @@ function tryDequeue(queue) {
   }
   
   if (cmd) {
-    txQueue.push(cmd.frame);
+    txQueue.push({ securityInfo: queue.device.protocolInfo, frame: cmd.frame });
     tryTransmit();
   }
   
   tryUnsetFramePending();
 }
 
-function addToQueue(frame, device, timeout, cb, address) {
-  if (!address) {
-    address = frame.destinationAddress;
-  }
-  
+function addToQueue(frame, device, timeout, cb) {  
   if (isPollDriven(device)) {
     radio.setDataRequestFramePending(true);
   }
   
-  var queue = getQueue(address);
+  var queue = getQueue(frame.destinationAddress);
   queue.device = device;
   queue.queue(new QueuedFrame(frame, timeout, cb)); 
   tryDequeue(queue); 
@@ -160,7 +168,7 @@ function addToQueue(frame, device, timeout, cb, address) {
 
 function transmitDiscoveryRequest() {
   var frame = osnp.createDiscoveryRequest();
-  txQueue.push(frame);
+  txQueue.push({ frame: frame });
   tryTransmit();
   
   if (deviceDiscoveryPeriods < 240) {
@@ -175,11 +183,19 @@ function tryTransmit() {
   if (!txFrame && (txQueue.length > 0)) {
     var frame = txQueue.shift();
     txFrame = frame;
-    var frameLength = frame.getEncodedLength();
+    
+    if (frame.frame.hasSecurityEnabled()) {
+      radio.setCipher(false, false, frame.securityInfo.securityLevel, frame.securityInfo.securityLevel);
+      radio.setTXNSecurityKey(frame.securityInfo.txKey);
+      frame.frame.frameCounter = frame.securityInfo.txFrameCounter++;
+      //TODO: the device needs to be updated in the db
+    }
+    
+    var frameLength = frame.frame.getEncodedLength();
     var buf = new Buffer(frameLength + 2);
-    buf[0] = frameLength - frame.payload.length;
+    buf[0] = frameLength - frame.frame.payload.length;
     buf[1] = frameLength;
-    frame.encode(buf.slice(2));
+    frame.frame.encode(buf.slice(2));
     radio.transmit(buf);
   }
 }
@@ -191,11 +207,14 @@ function handleMACFrame(frame) {
     var queue = getQueue(frame.sourceAddress);
     
     if (queue.device) {
-      delete deviceQueues[queue.device.protocolInfo.eui];
       var cmd = queue.deviceResponded();
       
       if (cmd) {
         queue.device.protocolInfo.capabilities = frame.payload[1];
+        queue.device.protocolInfo.securityLevel = frame.payload[2];
+        queue.device.protocolInfo.txKey = queue.device.protocolInfo._txKey;
+        delete queue.device.protocolInfo['_txKey'];
+        //TODO: update db
         cmd.callback(queue.device);
       }
 
@@ -238,7 +257,21 @@ function handleDataFrame(frame) {
   tryDequeue(queue); 
 }
 
+function handleSecuredFrame(rawFrame) {
+  var frame = osnp.parseFrame(rawFrame);
+  var queue = getQueue(frame.sourceAddress);  
+  
+  if (!queue.device) {
+    radio.setCipher(false, true, 0x00, 0x00);
+    return;
+  }
+  
+  radio.setRXSecurityKey(queue.device.protocolInfo.rxKey);
+  radio.setCipher(true, false, queue.device.protocolInfo.securityLevel, queue.device.protocolInfo.securityLevel);
+}
+
 function handleReceived(rawFrame, lqi, rssi) {
+  //TODO: check security and counter
   var frame = osnp.parseFrame(rawFrame);
   
   switch(frame.getFrameType()) {
@@ -261,6 +294,7 @@ function handleTransmitted(txErr, ccaErr) {
   } else if (txFrame.payload[0] == MACCommand.DISASSOCIATED) {
     var queue = getQueue(txFrame.destinationAddress);
     delete deviceQueues[queue.device.protocolInfo.shortAddress];
+    delete deviceQueues[queue.device.protocolInfo.eui];
     addressTable.free(queue.device.protocolInfo.shortAddress);
     var cmd = queue.deviceResponded();
     cmd.callback(queue.device);
@@ -279,5 +313,10 @@ function OSNPProtocolInfo(eui) {
   eui.copy(this.eui);
   this.shortAddress = null;
   this.capabilities = null;
+  this.securityLevel = null;
+  this.rxKey = null;
+  this.txKey = null;
+  this.rxFrameCounter = 0;
+  this.txFrameCounter = 0;
   this.id = this.eui.toString('hex');
 }

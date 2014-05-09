@@ -183,17 +183,20 @@ function tryTransmit() {
   if (!txFrame && (txQueue.length > 0)) {
     var frame = txQueue.shift();
     txFrame = frame;
+
+    var frameLength = frame.frame.getEncodedLength();
+    var headerLength = frameLength - frame.frame.payload.length;
     
     if (frame.frame.hasSecurityEnabled()) {
+      headerLength -= 5;
       radio.setCipher(false, false, frame.securityInfo.securityLevel, frame.securityInfo.securityLevel);
       radio.setTXNSecurityKey(frame.securityInfo.txKey);
       frame.frame.frameCounter = frame.securityInfo.txFrameCounter++;
       //TODO: the device needs to be updated in the db
     }
     
-    var frameLength = frame.frame.getEncodedLength();
     var buf = new Buffer(frameLength + 2);
-    buf[0] = frameLength - frame.frame.payload.length;
+    buf[0] = headerLength;
     buf[1] = frameLength;
     frame.frame.encode(buf.slice(2));
     radio.transmit(buf);

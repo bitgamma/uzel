@@ -86,8 +86,8 @@ exports.pair = function(device, pairingData, cb) {
   device.protocolInfo.txKey = pairingData;
   device.protocolInfo._txKey = crypto.randomBytes(16);
   device.protocolInfo.rxKey = crypto.randomBytes(16);
-  device.protocolInfo.securityLevel = SecurityLevel.AES_CCM_64;
-
+  //device.protocolInfo.securityLevel = SecurityLevel.AES_CCM_64;
+  device.protocolInfo.securityLevel = SecurityLevel.AES_CBC_MAC_64;
   var frame = osnp.createPairingCommand(device.protocolInfo.eui, device.protocolInfo.shortAddress, device.protocolInfo._txKey, device.protocolInfo.rxKey);
   deviceQueues[device.protocolInfo.shortAddress.toString('hex')] = deviceQueues[device.protocolInfo.eui.toString('hex')];
   addToQueue(frame, device, 1000, cb);

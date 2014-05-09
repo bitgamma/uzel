@@ -288,11 +288,11 @@ function handleTransmitted(txErr, ccaErr) {
   if(ccaErr) {
     txQueue.push(txFrame);
   } else if (txErr) {
-    var queue = getQueue(txFrame.destinationAddress);
+    var queue = getQueue(txFrame.frame.destinationAddress);
     var sentCmd = queue.deviceResponded();
     //TODO: handle error by invoking callback with a proper error code
-  } else if (txFrame.payload[0] == MACCommand.DISASSOCIATED) {
-    var queue = getQueue(txFrame.destinationAddress);
+  } else if (txFrame.frame.payload[0] == MACCommand.DISASSOCIATED) {
+    var queue = getQueue(txFrame.frame.destinationAddress);
     delete deviceQueues[queue.device.protocolInfo.shortAddress];
     delete deviceQueues[queue.device.protocolInfo.eui];
     addressTable.free(queue.device.protocolInfo.shortAddress);

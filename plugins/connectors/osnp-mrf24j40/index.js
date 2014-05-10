@@ -147,7 +147,7 @@ function tryDequeue(queue) {
   }
   
   if (cmd) {
-    txQueue.push({ securityInfo: queue.device.protocolInfo, frame: cmd.frame });
+    txQueue.push({ device: queue.device, frame: cmd.frame });
     tryTransmit();
   }
   
@@ -178,6 +178,12 @@ function transmitDiscoveryRequest() {
   }
 }
 
+function transmitFrameCounterAlign(device) {
+  var frame = osnp.createFrameCounterAlign(device.protocolInfo.rxFrameCounter + 1, device.protocolInfo.shortAddress);
+  txQueue.push({ device: device frame: frame });
+  tryTransmit();  
+}
+
 function tryTransmit() {
   if (!txFrame && (txQueue.length > 0)) {
     var frame = txQueue.shift();
@@ -188,10 +194,10 @@ function tryTransmit() {
     
     if (frame.frame.hasSecurityEnabled()) {
       headerLength -= 5;
-      radio.setCipher(false, false, frame.securityInfo.securityLevel, frame.securityInfo.securityLevel);
-      radio.setTXNSecurityKey(frame.securityInfo.txKey);
-      frame.frame.frameCounter = frame.securityInfo.txFrameCounter++;
-      //TODO: the device needs to be updated in the db
+      radio.setCipher(false, false, frame.device.protocolInfo.securityLevel, frame.device.protocolInfo.securityLevel);
+      radio.setTXNSecurityKey(frame.device.protocolInfo.txKey);
+      frame.frame.frameCounter = frame.device.protocolInfo.txFrameCounter++;
+      exports.emit('deviceUpdated', frame.device);
     }
     
     var buf = new Buffer(frameLength + 2);
@@ -208,7 +214,7 @@ function handleMACFrame(frame) {
     //TODO: handle error
     var queue = getQueue(frame.sourceAddress);
     
-    if (queue.device) {
+    if (queue.device && !queue.device.paired) {
       var cmd = queue.deviceResponded();
       
       if (cmd) {
@@ -216,7 +222,7 @@ function handleMACFrame(frame) {
         queue.device.protocolInfo.securityLevel = frame.payload[2];
         queue.device.protocolInfo.txKey = queue.device.protocolInfo._txKey;
         delete queue.device.protocolInfo['_txKey'];
-        //TODO: update db
+        exports.emit('deviceUpdated', queue.device);
         cmd.callback(queue.device);
       }
 
@@ -229,6 +235,19 @@ function handleMACFrame(frame) {
     if (queue.device) {
       queue.active = true;
       tryDequeue(queue);      
+    }
+    break;
+  case MACCommand.FRAME_COUNTER_ALIGN:
+    var queue = getQueue(frame.sourceAddress);
+    
+    if (queue.device) {
+      var newTxCounter = frame.payload.readUInt32LE(1);
+      
+      if (newTxCounter > queue.device.protocolInfo.txFrameCounter) {
+        queue.device.protocolInfo.txFrameCounter = txFrameCounter;
+        queue.rescheduleAwaiting();
+        tryDequeue(queue);
+      }
     }
     break;
   case MACCommand.DISCOVER:
@@ -272,8 +291,24 @@ function handleKeyRequest(eui) {
 }
 
 function handleReceived(rawFrame, lqi, rssi) {
-  //TODO: check security and counter
   var frame = osnp.parseFrame(rawFrame);
+  var queue = getQueue(frame.sourceAddress);  
+  
+  if (queue.device && queue.device.paired) {
+    if (!frame.hasSecurityEnabled() && (frame.getFrameType() == FrameType.DATA)) {
+      return;      
+    }
+    
+    if (frame.frameCounter <= queue.device.rxFrameCounter) {
+      transmitFrameCounterAlign(queue.device);
+      queue.rescheduleAwaiting();
+      tryDequeue(queue);
+      return;
+    } else {
+      queue.device.rxFrameCounter = frame.frameCounter;
+      exports.emit('deviceUpdated', queue.device);
+    }
+  }
   
   switch(frame.getFrameType()) {
   case FrameType.MAC_CMD:

@@ -34,12 +34,12 @@ html(lang="en", data-ng-app="deviceManager")
       .modal-header
         h3.modal-title Insert the Pairing Key
       .modal-body
-        form
+        form(name="pairingDataForm")
           .form-group
-            input.form-control(placeholder="Enter Pairing Key")
+            input.form-control(data-ng-model="$parent.pairingData", data-ng-required="true", data-ng-pattern="/^[0-9a-fA-F]{32}$/" placeholder="Enter Pairing Key")
       .modal-footer
-        button.btn.btn-primary(data-ng-click="ok()") OK
-        button.btn.btn-warning(data-ng-click="cancel()") Cancel
+        button.btn.btn-confirm(data-ng-click="ok()", data-ng-disabled="pairingDataForm.$invalid") OK
+        button.btn.btn-cancel(data-ng-click="cancel()") Cancel
     include ./_navigation.jade
     +nav("/", "Home", "Device Manager")
     .container
@@ -51,4 +51,4 @@ html(lang="en", data-ng-app="deviceManager")
       .row
         +deviceObject("unpairedDevices", "device-unpaired", "btn-confirm", "Pair", "pairDevice")
       br
-      br  
+      br

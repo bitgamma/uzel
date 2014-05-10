@@ -1,5 +1,5 @@
 var deviceManager = angular.module('deviceManager', [
-  'btford.socket-io'
+  'btford.socket-io', 'ui.bootstrap'
 ]).factory('deviceSocket', function (socketFactory) {
   var deviceIOSocket = io.connect('/devices');
 
@@ -10,15 +10,23 @@ var deviceManager = angular.module('deviceManager', [
   return deviceSocket;
 });
  
-deviceManager.controller('DeviceController', function ($scope, deviceSocket) {  
+deviceManager.controller('DeviceController', function ($scope, deviceSocket, $modal) {  
   $scope.discoverDevices = function() {
     $scope.unpairedDevices = [];
     deviceSocket.emit('discoverDevices');
   }
   
   $scope.pairDevice = function(device) {
-    deviceSocket.emit('pairDevice', device);
+    var modalInstance = $modal.open({
+      templateUrl: 'getPairingData.html',
+      controller: ModalInstanceCtrl,
+    });
+    
+    modalInstance.result.then(function (pairingData) {
+      deviceSocket.emit('pairDevice', device, pairingData);
+    });
   }
+  
   
   $scope.unpairDevice = function(device) {
     deviceSocket.emit('unpairDevice', device);
@@ -43,3 +51,15 @@ deviceManager.controller('DeviceController', function ($scope, deviceSocket) {
     $scope.pairedDevices = $scope.pairedDevices.filter(function(dev) { dev.id != device.id });
   });
 });
+
+var ModalInstanceCtrl = function ($scope, $modalInstance) {
+  $scope.pairingData = null;
+  
+  $scope.ok = function () {
+    $modalInstance.close($scope.pairingData);
+  };
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+};

@@ -246,6 +246,7 @@ function handleMACFrame(frame) {
       if (newTxCounter > queue.device.protocolInfo.txFrameCounter) {
         queue.device.protocolInfo.txFrameCounter = newTxCounter;
         queue.rescheduleAwaiting();
+        queue.active = false;
         tryDequeue(queue);
       }
     }
@@ -303,6 +304,7 @@ function handleReceived(rawFrame, lqi, rssi) {
       if (frame.frameCounter <= queue.device.rxFrameCounter) {
         transmitFrameCounterAlign(queue.device);
         queue.rescheduleAwaiting();
+        queue.active = false;
         tryDequeue(queue);
         return;
       } else {

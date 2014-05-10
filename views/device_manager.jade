@@ -26,9 +26,20 @@ html(lang="en", data-ng-app="deviceManager")
     link(rel="stylesheet", href="/css/dm.css")  
     script(src='/socket.io/socket.io.js')
     script(src='/bower_components/angular/angular.min.js')
+    script(src='/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js')
     script(src='/bower_components/angular-socket-io/socket.min.js')
     script(src='/js/device_manager.js')
   body(data-ng-controller="DeviceController")
+    script(type="text/ng-template", id="getPairingData.html")
+      .modal-header
+        h3.modal-title Insert the Pairing Key
+      .modal-body
+        form
+          .form-group
+            input.form-control(placeholder="Enter Pairing Key")
+      .modal-footer
+        button.btn.btn-primary(data-ng-click="ok()") OK
+        button.btn.btn-warning(data-ng-click="cancel()") Cancel
     include ./_navigation.jade
     +nav("/", "Home", "Device Manager")
     .container

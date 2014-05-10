@@ -244,7 +244,7 @@ function handleMACFrame(frame) {
       var newTxCounter = frame.payload.readUInt32LE(1);
       
       if (newTxCounter > queue.device.protocolInfo.txFrameCounter) {
-        queue.device.protocolInfo.txFrameCounter = txFrameCounter;
+        queue.device.protocolInfo.txFrameCounter = newTxCounter;
         queue.rescheduleAwaiting();
         tryDequeue(queue);
       }

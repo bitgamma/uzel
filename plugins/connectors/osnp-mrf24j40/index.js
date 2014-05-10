@@ -299,14 +299,16 @@ function handleReceived(rawFrame, lqi, rssi) {
       return;      
     }
     
-    if (frame.frameCounter <= queue.device.rxFrameCounter) {
-      transmitFrameCounterAlign(queue.device);
-      queue.rescheduleAwaiting();
-      tryDequeue(queue);
-      return;
-    } else {
-      queue.device.rxFrameCounter = frame.frameCounter;
-      exports.emit('deviceUpdated', queue.device);
+    if (frame.hasSecurityEnabled()) {
+      if (frame.frameCounter <= queue.device.rxFrameCounter) {
+        transmitFrameCounterAlign(queue.device);
+        queue.rescheduleAwaiting();
+        tryDequeue(queue);
+        return;
+      } else {
+        queue.device.rxFrameCounter = frame.frameCounter;
+        exports.emit('deviceUpdated', queue.device);
+      }      
     }
   }
   

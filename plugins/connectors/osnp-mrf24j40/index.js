@@ -180,7 +180,7 @@ function transmitDiscoveryRequest() {
 
 function transmitFrameCounterAlign(device) {
   var frame = osnp.createFrameCounterAlign(device.protocolInfo.rxFrameCounter + 1, device.protocolInfo.shortAddress);
-  txQueue.push({ device: device frame: frame });
+  txQueue.push({ device: device, frame: frame });
   tryTransmit();  
 }
 

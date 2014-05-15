@@ -3,7 +3,7 @@ Uzel
 
 Uzel is your home's control panel. It can be your HVAC, your alarm, your plant irrigation control system, your lighting system and even more. And all this on the same device!
 
-Uzel is meant to run on small embedded computer systems. Currently, it is being tested on the [Raspberyy Pi](http://raspberrypi.org) but, being a Node application, it should be portable on other system without much effort, if at all.
+Uzel is meant to run on small embedded computer systems. Currently, it is being tested on the [Raspberry Pi](http://raspberrypi.org) but, being a Node application, it should be portable on other system without much effort, if at all.
 
 Technically Uzel is a node based application server and hub for [OSNP](https://github.com/briksoftware/osnp) networks. It can handle any OSNP-compatible device and host any number of virtual appliances written for it. It ships with a Device Manager and a Dashboard appliance, which allows you to monitor all connected devices.
 

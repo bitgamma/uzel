@@ -1,0 +1,38 @@
+html, body { 
+  height: 100%;
+}
+
+.navbar-uzel {
+  z-index: 1;
+}
+
+.settings-nav {
+  height: 100%; 
+  position: absolute; 
+  background-color: rgb(245, 245, 245);
+  top: 0px; 
+  left: 0; 
+  bottom: 0;
+  width: 290px;
+  z-index: 0;
+  padding-top: 90px;
+  border-right: 1px solid rgb(200, 200, 200);
+}
+
+.settings-nav ul li.active a {
+  background-color: rgb(67, 172, 106);
+  color: white;
+}
+
+.settings-nav ul li.active a:hover {
+  background-color: rgb(27, 132, 66);
+}
+
+.settings-nav ul li a {
+  color: rgb(67, 172, 106);
+}
+
+.settings-nav ul li a:hover {
+  color: rgb(27, 132, 66);
+}
+

@@ -8,7 +8,7 @@ html, body {
 
 .settings-nav {
   height: 100%; 
-  position: absolute; 
+  position: fixed; 
   background-color: rgb(245, 245, 245);
   top: 0px; 
   left: 0; 
@@ -36,3 +36,45 @@ html, body {
   color: rgb(27, 132, 66);
 }
 
+.settings-panel {
+  padding-left: 310px;
+  padding-right: 40px;
+  padding-bottom: 40px;
+}
+
+.settings-group {
+  padding-top: 30px;
+  padding-left: 25px;
+  padding-bottom: 15px;
+}
+
+.settings-label {
+  font-size: 14pt;
+  padding-bottom: 20px;
+}
+
+.settings-control {
+  max-width: 300px;
+}
+
+.color-settings-group {
+  padding-top: 15px;
+}
+
+.color-settings {
+  width: 130px;
+  margin-right: 50px;
+}
+
+.subtitle {
+  font-size: 12pt;
+}
+
+.color-label {
+  margin-right: 25px;
+  padding-left: 10px;
+}
+
+.settings-title {
+  padding-top: 15px;
+}

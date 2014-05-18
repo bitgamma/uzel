@@ -1,19 +1,24 @@
 var settings = angular.module('settings', [
-  'ngRoute'
+  'ngRoute', 'colorpicker.module'
 ]);
 
 settings.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
       when('/general', {
-        templateUrl: '/settings/_general.html',
+        templateUrl: '/partials/settings/general',
         controller: 'GeneralSettingsCtrl'
       }).
       when('/device/:deviceID', {
-        templateUrl: 'partials/device-settings.html',
+        templateUrl: '/partials/device-settings.html',
         controller: 'DeviceSettingsCtrl'
       }).
       otherwise({
         redirectTo: '/general'
       });
 }]);
+
+settings.controller('GeneralSettingsCtrl', function($scope) {
+});
+
+

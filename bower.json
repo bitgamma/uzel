@@ -9,6 +9,7 @@
     "angular-socket-io": "~0.4.1",
     "es6-shim": "~0.10.1",
     "angular-bootstrap": "~0.11.0",
-    "angular-route": "~1.2.16"
+    "angular-route": "~1.2.16",
+    "angular-bootstrap-colorpicker": "~3.0.7"
   }
 }

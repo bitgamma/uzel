@@ -1,0 +1,36 @@
+h2.settings-title Interface
+form
+  .form-group.settings-group
+    label.settings-label(for="language") Language
+    select#language.form-control.settings-control
+      option English
+      option Русский
+  .form-group.settings-group    
+    .settings-label Color Theme
+    .color-settings-group
+      label.color-label.subtitle(for="primary-color-picker") Primary Color 
+      input#primary-color-picker.color-settings(colorpicker="hex" type="text")
+      label.color-label.subtitle(for="secondary-color-picker") Secondary Color 
+      input#secondary-color-picker.color-settings(colorpicker="hex" type="text")  
+hr      
+h2.settings-title Network
+form
+  .form-group.settings-group
+    label.settings-label(for="port") Port
+    input.settings-control.form-control(type="number") 
+    label(for="listen-internet")
+      input(type="checkbox")
+      |&nbsp;&nbsp;Listen on remote interface
+hr      
+h2.settings-title Security
+form
+   .form-group.settings-group  
+     .settings-label Change Password 
+     .color-settings-group
+        label.subtitle(for="current-password") Current Password
+        input#current-password.form-control.settings-control(type="password")
+      .color-settings-group
+        label.subtitle(for="new-password") New Password
+        input#new-password.form-control.settings-control(type="password")    
+
+  
